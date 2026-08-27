@@ -7,7 +7,11 @@ import {
 	AuthResponse,
 } from '@/types/auth.types';
 import { apiClient } from '@/lib/api/client';
-import { ApiErrorResponse } from '@/types/api.types';
+import { AxiosError } from 'axios';
+
+interface ApiErrorResponse {
+	error: { message: string };
+}
 
 const initialState: AuthState = {
 	user: null,
@@ -17,45 +21,63 @@ const initialState: AuthState = {
 };
 
 // Login Thunk
-export const login = createAsyncThunk(
-	'auth/login',
-	async (credentials: LoginCredentials, { rejectWithValue }) => {
-		try {
-			const response = await apiClient.post<AuthResponse>('/api/auth/local', {
-				identifier: credentials.identifier,
-				password: credentials.password,
-			});
-			return response.data;
-		} catch (error: unknown) {
-			return rejectWithValue(
-				(error as ApiErrorResponse).error.message || 'Login failed',
-			);
-		}
-	},
-);
+export const login = createAsyncThunk<
+	{ jwt: string; user: User },
+	LoginCredentials,
+	{ rejectValue: string }
+>('auth/login', async (credentials: LoginCredentials, { rejectWithValue }) => {
+	try {
+		// Step 1: Login
+		const response = await apiClient.post<AuthResponse>('/api/auth/local', {
+			identifier: credentials.identifier,
+			password: credentials.password,
+		});
+
+		// Step 2: Fetch user with role
+		const userResponse = await apiClient.get(
+			'/api/users/me?populate[role]=true',
+			{
+				headers: { Authorization: `Bearer ${response.data.jwt}` },
+			},
+		);
+
+		// Step 3: Merge JWT from login with full user from /me
+		return {
+			jwt: response.data.jwt,
+			user: userResponse.data,
+		};
+	} catch (error) {
+		const err = error as AxiosError<ApiErrorResponse>;
+		return rejectWithValue(
+			err.response?.data?.error?.message || 'Login failed',
+		);
+	}
+});
 
 // Register Thunk
-export const register = createAsyncThunk(
-	'auth/register',
-	async (data: RegisterData, { rejectWithValue }) => {
-		try {
-			const response = await apiClient.post<AuthResponse>(
-				'/api/registration/register',
-				{
-					username: data.username,
-					email: data.email,
-					password: data.password,
-					role: data.role,
-				},
-			);
-			return response.data;
-		} catch (error: unknown) {
-			return rejectWithValue(
-				(error as ApiErrorResponse).error.message || 'Registration failed',
-			);
-		}
-	},
-);
+export const register = createAsyncThunk<
+	AuthResponse,
+	RegisterData,
+	{ rejectValue: string }
+>('auth/register', async (data: RegisterData, { rejectWithValue }) => {
+	try {
+		const response = await apiClient.post<AuthResponse>(
+			'/api/registration/register',
+			{
+				username: data.username,
+				email: data.email,
+				password: data.password,
+				role: data.role,
+			},
+		);
+		return response.data;
+	} catch (error) {
+		const err = error as AxiosError<ApiErrorResponse>;
+		return rejectWithValue(
+			err.response?.data?.error?.message || 'Registration failed',
+		);
+	}
+});
 
 const authSlice = createSlice({
 	name: 'auth',
@@ -67,6 +89,7 @@ const authSlice = createSlice({
 			state.error = null;
 			if (typeof window !== 'undefined') {
 				localStorage.removeItem('jwt');
+				document.cookie = 'jwt=; Path=/; Max-Age=0';
 			}
 		},
 		clearError: (state) => {
@@ -89,11 +112,12 @@ const authSlice = createSlice({
 				state.token = action.payload.jwt;
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
+					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/`;
 				}
 			})
 			.addCase(login.rejected, (state, action) => {
 				state.isLoading = false;
-				state.error = action.payload as string;
+				state.error = action.payload || 'Login failed';
 			})
 			// Register
 			.addCase(register.pending, (state) => {
@@ -106,11 +130,12 @@ const authSlice = createSlice({
 				state.token = action.payload.jwt;
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
+					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/`;
 				}
 			})
 			.addCase(register.rejected, (state, action) => {
 				state.isLoading = false;
-				state.error = action.payload as string;
+				state.error = action.payload || 'Registration failed';
 			});
 	},
 });

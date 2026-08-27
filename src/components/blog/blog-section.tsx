@@ -1,8 +1,7 @@
 import { Container } from '@/components/ui/container';
 import { BlogList } from './blog-list';
 import { BlogPost } from '@/types/blog.types';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+
 
 interface BlogSectionProps {
 	posts: BlogPost[];

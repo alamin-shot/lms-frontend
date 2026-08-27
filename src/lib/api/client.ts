@@ -13,9 +13,14 @@ export const apiClient = axios.create({
 // Request interceptor - add token
 apiClient.interceptors.request.use(
 	(config) => {
-		const token = localStorage.getItem('jwt');
-		if (token) {
-			config.headers.Authorization = `Bearer ${token}`;
+		const skipAuthPaths = ['/api/auth/local', '/api/registration/register'];
+		const shouldSkip = skipAuthPaths.some((path) => config.url?.includes(path));
+
+		if (!shouldSkip) {
+			const token = localStorage.getItem('jwt');
+			if (token) {
+				config.headers.Authorization = `Bearer ${token}`;
+			}
 		}
 		return config;
 	},

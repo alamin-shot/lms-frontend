@@ -2,7 +2,11 @@ export interface User {
 	id: number;
 	username: string;
 	email: string;
-	role: 'Admin' | 'Content Manager' | 'Instructor' | 'Student';
+	role: {
+		id: number;
+		name: 'Admin' | 'Content Manager' | 'Instructor' | 'Student';
+		description?: string;
+	};
 	createdAt?: string;
 	updatedAt?: string;
 }

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, User } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 interface BlogCardProps {
 	post: BlogPost;

@@ -21,9 +21,9 @@ export function CourseDetailPage({
 }: CourseDetailPageProps) {
 	const lessons = course.lessons || [];
 
-	const handleEnroll = () => {
-		console.log('Enroll clicked');
-	};
+	// const handleEnroll = () => {
+	// 	console.log('Enroll clicked');
+	// };
 
 	const handleToggleComplete = (lessonId: number) => {
 		console.log('Toggle complete:', lessonId);
