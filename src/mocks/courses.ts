@@ -1,0 +1,73 @@
+import { Course } from '@/types/course.types';
+
+export const featuredCourses: Course[] = [
+	{
+		id: 1,
+		documentId: 'course1',
+		title: 'Complete Web Development Bootcamp',
+		description: 'Learn HTML, CSS, JavaScript, React, Node.js from scratch',
+		coverImage: 'https://picsum.photos/400/250',
+		slug: 'web-development-bootcamp',
+		instructor: {
+			id: 1,
+			username: 'johndoe',
+			email: 'john@example.com',
+			role: 'Instructor',
+		},
+		createdAt: '2024-01-01',
+		updatedAt: '2024-01-01',
+		publishedAt: '2024-01-01',
+	},
+	{
+		id: 2,
+		documentId: 'course2',
+		title: 'Python for Data Science',
+		description: 'Master Python, Pandas, NumPy, Matplotlib for data analysis',
+		coverImage: 'https://picsum.photos/400/251',
+		slug: 'python-data-science',
+		instructor: {
+			id: 2,
+			username: 'janesmith',
+			email: 'jane@example.com',
+			role: 'Instructor',
+		},
+		createdAt: '2024-02-01',
+		updatedAt: '2024-02-01',
+		publishedAt: '2024-02-01',
+	},
+	{
+		id: 3,
+		documentId: 'course3',
+		title: 'UI/UX Design Masterclass',
+		description: 'Learn design principles, Figma, prototyping, user research',
+		coverImage: 'https://picsum.photos/400/252',
+		slug: 'ui-ux-design',
+		instructor: {
+			id: 3,
+			username: 'sarahjohnson',
+			email: 'sarah@example.com',
+			role: 'Instructor',
+		},
+		createdAt: '2024-03-01',
+		updatedAt: '2024-03-01',
+		publishedAt: '2024-03-01',
+	},
+	{
+		id: 4,
+		documentId: 'course4',
+		title: 'Machine Learning A-Z',
+		description:
+			'Learn ML algorithms, TensorFlow, neural networks from experts',
+		coverImage: 'https://picsum.photos/400/253',
+		slug: 'machine-learning',
+		instructor: {
+			id: 4,
+			username: 'mikebrown',
+			email: 'mike@example.com',
+			role: 'Instructor',
+		},
+		createdAt: '2024-04-01',
+		updatedAt: '2024-04-01',
+		publishedAt: '2024-04-01',
+	},
+];
