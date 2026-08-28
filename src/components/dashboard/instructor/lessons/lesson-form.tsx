@@ -47,7 +47,7 @@ export function LessonForm({
 				<Textarea
 					id='content'
 					placeholder='Write your lesson content...'
-					className='min-h-[150px]'
+					className='min-h-37.5'
 					{...register('content')}
 				/>
 				{errors.content && (

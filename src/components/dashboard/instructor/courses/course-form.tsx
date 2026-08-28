@@ -47,7 +47,7 @@ export function CourseForm({
 				<Textarea
 					id='description'
 					placeholder='Describe your course...'
-					className='min-h-[120px]'
+					className='min-h-30'
 					{...register('description')}
 				/>
 				{errors.description && (

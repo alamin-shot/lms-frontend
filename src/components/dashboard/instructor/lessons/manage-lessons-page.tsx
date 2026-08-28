@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Course, Lesson } from '@/types/course.types';
+import { Course } from '@/types/course.types';
 import { Plus, Edit, Trash2, GripVertical } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
 import { useState } from 'react';

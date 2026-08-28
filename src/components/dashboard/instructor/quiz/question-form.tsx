@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +25,6 @@ export function QuestionForm({
 	const {
 		register,
 		handleSubmit,
-		control,
 		watch,
 		setValue,
 		formState: { errors },
@@ -61,6 +60,7 @@ export function QuestionForm({
 							{...register(`options.${index}`)}
 						/>
 						<RadioGroup
+							// eslint-disable-next-line react-hooks/incompatible-library
 							value={watch('correctAnswer')}
 							onValueChange={(value) => setValue('correctAnswer', value)}
 							className='flex items-center'

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Course } from '@/types/course.types';
 import { Quiz } from '@/types/quiz.types';
-import { Plus, Edit, Trash2, FileQuestion } from 'lucide-react';
+import { Plus, Edit, FileQuestion } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
 import { useState } from 'react';
 import { DeleteConfirmationModal } from '@/components/ui/delete-confirmation-modal';
