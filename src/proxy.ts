@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// ============================================================
-// JWT DECODING HELPER
-// ============================================================
 function decodeJWT(token: string) {
 	try {
 		const base64Url = token.split('.')[1];
@@ -20,9 +17,6 @@ function decodeJWT(token: string) {
 	}
 }
 
-// ============================================================
-// MAIN PROXY FUNCTION
-// ============================================================
 export function proxy(request: NextRequest) {
 	const token = request.cookies.get('jwt')?.value;
 	const { pathname } = request.nextUrl;
@@ -39,14 +33,18 @@ export function proxy(request: NextRequest) {
 	);
 
 	// ============================================================
-	// 2. DASHBOARD ROUTES (auth required)
+	// 2. PROTECTED ROUTES (auth required)
 	// ============================================================
+	// Lesson player routes: /courses/[slug]/lessons/[id]
+	const isLessonRoute = /^\/courses\/[^\/]+\/lessons\/\d+$/.test(pathname);
 	const isDashboardRoute = pathname.startsWith('/dashboard');
 
 	// ============================================================
-	// 3. AUTH PAGES (redirect if already logged in)
+	// 3. PROTECT LESSON ROUTES (auth only)
 	// ============================================================
-	const isAuthPage = pathname === '/login' || pathname === '/register';
+	if (isLessonRoute && !token) {
+		return NextResponse.redirect(new URL('/login', request.url));
+	}
 
 	// ============================================================
 	// 4. PROTECT DASHBOARD ROUTES
@@ -58,8 +56,7 @@ export function proxy(request: NextRequest) {
 	// ============================================================
 	// 5. REDIRECT LOGGED-IN USERS AWAY FROM AUTH PAGES
 	// ============================================================
-	if (token && isAuthPage) {
-		// Decode token to get role for proper redirect
+	if (token && (pathname === '/login' || pathname === '/register')) {
 		const payload = decodeJWT(token);
 		const role = payload?.role || 'Student';
 		const dashboardMap: Record<string, string> = {
@@ -68,15 +65,33 @@ export function proxy(request: NextRequest) {
 			'Content Manager': '/dashboard/content-manager',
 			Admin: '/dashboard/admin',
 		};
-		const redirectPath = dashboardMap[role] || '/dashboard/student';
-		return NextResponse.redirect(new URL(redirectPath, request.url));
+		return NextResponse.redirect(
+			new URL(dashboardMap[role] || '/dashboard/student', request.url),
+		);
 	}
 
 	// ============================================================
-	// 6. ROLE-BASED ACCESS FOR DASHBOARDS
+	// 6. REDIRECT SHORT URLs
+	// ============================================================
+	if (pathname === '/student') {
+		return NextResponse.redirect(new URL('/dashboard/student', request.url));
+	}
+	if (pathname === '/instructor') {
+		return NextResponse.redirect(new URL('/dashboard/instructor', request.url));
+	}
+	if (pathname === '/admin') {
+		return NextResponse.redirect(new URL('/dashboard/admin', request.url));
+	}
+	if (pathname === '/content-manager') {
+		return NextResponse.redirect(
+			new URL('/dashboard/content-manager', request.url),
+		);
+	}
+
+	// ============================================================
+	// 7. ROLE-BASED ACCESS FOR DASHBOARDS
 	// ============================================================
 	if (isDashboardRoute && token) {
-		// Decode JWT to get role
 		const payload = decodeJWT(token);
 		const role = payload?.role || 'Student';
 
@@ -87,45 +102,30 @@ export function proxy(request: NextRequest) {
 			Admin: ['/dashboard/admin'],
 		};
 
-		// Check if user has access to this dashboard
 		const allowedDashboards = roleDashboardMap[role] || [];
 		const hasAccess = allowedDashboards.some((dashboard) =>
 			pathname.startsWith(dashboard),
 		);
 
-		// If user tries to access a dashboard they don't have permission for
 		if (!hasAccess) {
-			// Redirect to their own dashboard
 			const redirectPath = roleDashboardMap[role]?.[0] || '/dashboard/student';
 			return NextResponse.redirect(new URL(redirectPath, request.url));
 		}
 	}
 
 	// ============================================================
-	// 7. ALLOW PUBLIC ROUTES
+	// 8. ALLOW PUBLIC ROUTES
 	// ============================================================
 	if (isPublicRoute) {
 		return NextResponse.next();
 	}
 
 	// ============================================================
-	// 8. DEFAULT: ALLOW
+	// 9. DEFAULT: ALLOW
 	// ============================================================
 	return NextResponse.next();
 }
 
-// ============================================================
-// CONFIG: Match all routes except static files
-// ============================================================
 export const config = {
-	matcher: [
-		/*
-		 * Match all request paths except:
-		 * - _next/static (static files)
-		 * - _next/image (image optimization files)
-		 * - favicon.ico (favicon file)
-		 * - public folder
-		 */
-		'/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)',
-	],
+	matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)'],
 };

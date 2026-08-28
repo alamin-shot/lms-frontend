@@ -1,4 +1,4 @@
-import { User } from "./auth.types";
+import { User } from './auth.types';
 
 export interface Course {
 	id: number;
@@ -33,4 +33,29 @@ export interface CourseProgress {
 	totalCount: number;
 	percentage: number;
 	completedLessons: number[];
+}
+
+export interface CourseDetailPageProps {
+	course: Course;
+	isEnrolled?: boolean;
+	initialCompletedLessonIds?: number[];
+	onProgressUpdate?: (completedIds: number[]) => void;
+}
+
+export interface LessonListWithProgressProps {
+	lessons: Lesson[];
+	courseSlug: string;
+	initialCompletedIds?: number[];
+	onProgressUpdate?: (completedIds: number[]) => void;
+}
+
+// Lesson Player Props
+export interface LessonPlayerProps {
+	course: Course;
+	lesson: Lesson;
+	allLessons: Lesson[];
+	isCompleted: boolean;
+	onToggleComplete: () => void;
+	nextLesson?: Lesson;
+	prevLesson?: Lesson;
 }

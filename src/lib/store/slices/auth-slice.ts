@@ -79,6 +79,30 @@ export const register = createAsyncThunk<
 	}
 });
 
+export const restoreUser = createAsyncThunk<
+	User,
+	void,
+	{ rejectValue: string }
+>('auth/restoreUser', async (_, { rejectWithValue }) => {
+	try {
+		const token = localStorage.getItem('jwt');
+		if (!token) {
+			return rejectWithValue('No stored session');
+		}
+
+		const response = await apiClient.get<User>(
+			'/api/users/me?populate[role]=true',
+		);
+		document.cookie = `jwt=${encodeURIComponent(token)}; Path=/`;
+		return response.data;
+	} catch (error) {
+		const err = error as AxiosError<ApiErrorResponse>;
+		return rejectWithValue(
+			err.response?.data?.error?.message || 'Session restore failed',
+		);
+	}
+});
+
 const authSlice = createSlice({
 	name: 'auth',
 	initialState,
@@ -136,6 +160,12 @@ const authSlice = createSlice({
 			.addCase(register.rejected, (state, action) => {
 				state.isLoading = false;
 				state.error = action.payload || 'Registration failed';
+			})
+			.addCase(restoreUser.fulfilled, (state, action) => {
+				state.user = action.payload;
+			})
+			.addCase(restoreUser.rejected, (state) => {
+				state.user = null;
 			});
 	},
 });

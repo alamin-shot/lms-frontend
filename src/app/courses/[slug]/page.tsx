@@ -18,8 +18,10 @@ export default async function CourseDetailPageRoute({
 		<CourseDetailPage
 			course={course}
 			isEnrolled={false}
-			completedLessonIds={[]}
-			progress={0}
+			initialCompletedLessonIds={[1, 2]}
+			onProgressUpdate={(completedIds) => {
+				console.log('Progress updated:', completedIds);
+			}}
 		/>
 	);
 }
