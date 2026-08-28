@@ -1,5 +1,5 @@
-import { User } from "./auth.types";
-import { Course } from "./course.types";
+import { User } from './auth.types';
+import { Course } from './course.types';
 
 export interface Quiz {
 	id: number;
@@ -56,4 +56,23 @@ export interface SubmitQuizResponse {
 	totalQuestions: number;
 	results: QuizResult[];
 	passed: boolean;
+}
+
+// Add to existing quiz.types.ts:
+
+export interface QuizTakerProps {
+	quiz: Quiz;
+	onComplete?: (score: number, answers: string[]) => void;
+}
+
+export interface QuizResult {
+	questionId: number;
+	userAnswer: string;
+	isCorrect: boolean;
+	correctAnswer: string;
+}
+
+export interface QuizPageProps {
+	quiz: Quiz;
+	courseSlug: string;
 }

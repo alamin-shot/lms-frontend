@@ -70,7 +70,13 @@ export const register = createAsyncThunk<
 				role: data.role,
 			},
 		);
-		return response.data;
+		const userResponse = await apiClient.get<User>(
+			'/api/users/me?populate[role]=true',
+			{
+				headers: { Authorization: `Bearer ${response.data.jwt}` },
+			},
+		);
+		return { jwt: response.data.jwt, user: userResponse.data };
 	} catch (error) {
 		const err = error as AxiosError<ApiErrorResponse>;
 		return rejectWithValue(
@@ -94,6 +100,7 @@ export const restoreUser = createAsyncThunk<
 			'/api/users/me?populate[role]=true',
 		);
 		document.cookie = `jwt=${encodeURIComponent(token)}; Path=/`;
+		document.cookie = `userRole=${encodeURIComponent(response.data.role.name)}; Path=/`;
 		return response.data;
 	} catch (error) {
 		const err = error as AxiosError<ApiErrorResponse>;
@@ -114,6 +121,7 @@ const authSlice = createSlice({
 			if (typeof window !== 'undefined') {
 				localStorage.removeItem('jwt');
 				document.cookie = 'jwt=; Path=/; Max-Age=0';
+				document.cookie = 'userRole=; Path=/; Max-Age=0';
 			}
 		},
 		clearError: (state) => {
@@ -137,6 +145,7 @@ const authSlice = createSlice({
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
 					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/`;
+					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/`;
 				}
 			})
 			.addCase(login.rejected, (state, action) => {
@@ -155,6 +164,7 @@ const authSlice = createSlice({
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
 					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/`;
+					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/`;
 				}
 			})
 			.addCase(register.rejected, (state, action) => {

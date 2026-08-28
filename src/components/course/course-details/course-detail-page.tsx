@@ -7,7 +7,8 @@ import { CourseProgressBar } from './course-progress-bar';
 import { CourseDetailPageProps } from '@/types/course.types';
 import { LessonListWithProgress } from '../lesson/lesson-list-with-progress';
 import { RoleAwareBackButton } from '@/components/ui/role-aware-back-button';
-
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export function CourseDetailPage({
 	course,
@@ -54,6 +55,26 @@ export function CourseDetailPage({
 						initialCompletedIds={initialCompletedLessonIds}
 						onProgressUpdate={onProgressUpdate}
 					/>
+
+					{isEnrolled && (
+						<div className='mt-8 p-6 rounded-xl border border-purple-500/30 bg-purple-500/10'>
+							<div className='flex items-center justify-between'>
+								<div>
+									<h3 className='font-semibold'>
+										Ready to test your knowledge?
+									</h3>
+									<p className='text-sm text-muted-foreground'>
+										Take the course quiz to earn your certificate
+									</p>
+								</div>
+								<Link href={`/dashboard/student/courses/${course.slug}/quiz`}>
+									<Button className='bg-purple-600 hover:bg-purple-700'>
+										Take Quiz
+									</Button>
+								</Link>
+							</div>
+						</div>
+					)}
 				</div>
 			</Container>
 		</main>

@@ -19,6 +19,10 @@ function decodeJWT(token: string) {
 
 export function proxy(request: NextRequest) {
 	const token = request.cookies.get('jwt')?.value;
+	const storedRoleCookie = request.cookies.get('userRole')?.value;
+	const storedRole = storedRoleCookie
+		? decodeURIComponent(storedRoleCookie)
+		: undefined;
 	const { pathname } = request.nextUrl;
 
 	// ============================================================
@@ -58,7 +62,7 @@ export function proxy(request: NextRequest) {
 	// ============================================================
 	if (token && (pathname === '/login' || pathname === '/register')) {
 		const payload = decodeJWT(token);
-		const role = payload?.role || 'Student';
+		const role = storedRole || payload?.role || 'Student';
 		const dashboardMap: Record<string, string> = {
 			Student: '/dashboard/student',
 			Instructor: '/dashboard/instructor',
@@ -93,7 +97,7 @@ export function proxy(request: NextRequest) {
 	// ============================================================
 	if (isDashboardRoute && token) {
 		const payload = decodeJWT(token);
-		const role = payload?.role || 'Student';
+		const role = storedRole || payload?.role || 'Student';
 
 		const roleDashboardMap: Record<string, string[]> = {
 			Student: ['/dashboard/student'],

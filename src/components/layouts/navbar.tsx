@@ -20,6 +20,15 @@ export function Navbar() {
 
 	const isClient = typeof window !== 'undefined';
 	const isAuthenticated = isClient && !!token && !!user;
+	const roleName =
+		typeof user?.role === 'string' ? user.role : user?.role?.name;
+	const dashboardMap: Record<string, string> = {
+		Student: '/dashboard/student',
+		Instructor: '/dashboard/instructor',
+		'Content Manager': '/dashboard/content-manager',
+		Admin: '/dashboard/admin',
+	};
+	const dashboardHref = dashboardMap[roleName || ''] || '/dashboard/student';
 
 	const handleLogout = () => {
 		dispatch(logout());
@@ -53,7 +62,7 @@ export function Navbar() {
 					</Link>
 					{isAuthenticated && (
 						<Link
-							href={`/dashboard/${user?.role?.name?.toLowerCase().replace(' ', '-')}`}
+							href={dashboardHref}
 							className='text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors'
 						>
 							Dashboard
