@@ -5,7 +5,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import {
 	questionSchema,
 	QuestionFormData,
@@ -25,6 +31,7 @@ export function QuestionForm({
 	const {
 		register,
 		handleSubmit,
+		control,
 		watch,
 		setValue,
 		formState: { errors },
@@ -59,22 +66,30 @@ export function QuestionForm({
 							placeholder={`Option ${index + 1}`}
 							{...register(`options.${index}`)}
 						/>
-						<RadioGroup
-							// eslint-disable-next-line react-hooks/incompatible-library
-							value={watch('correctAnswer')}
-							onValueChange={(value) => setValue('correctAnswer', value)}
-							className='flex items-center'
-						>
-							<RadioGroupItem
-								value={options[index] || ''}
-								id={`option-${index}`}
-							/>
-						</RadioGroup>
 					</div>
 				))}
 				{errors.options && (
 					<p className='text-sm text-red-500'>{errors.options.message}</p>
 				)}
+			</div>
+
+			<div className='space-y-2'>
+				<Label htmlFor='correctAnswer'>Correct Answer</Label>
+				<Select
+					value={watch('correctAnswer') || undefined}
+					onValueChange={(value) => setValue('correctAnswer', value || '')}
+				>
+					<SelectTrigger>
+						<SelectValue placeholder='Select the correct answer' />
+					</SelectTrigger>
+					<SelectContent>
+						{options.map((option, index) => (
+							<SelectItem key={index} value={option}>
+								{option || `Option ${index + 1}`}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 				{errors.correctAnswer && (
 					<p className='text-sm text-red-500'>{errors.correctAnswer.message}</p>
 				)}

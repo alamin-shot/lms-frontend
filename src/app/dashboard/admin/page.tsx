@@ -1,10 +1,5 @@
-export default function AdminDashboardPage() {
-	return (
-		<div>
-			<h1 className='text-3xl font-bold'>Admin Dashboard</h1>
-			<p className='text-muted-foreground mt-2'>
-				Full platform control and analytics
-			</p>
-		</div>
-	);
+import { AdminDashboardPage } from "@/components/dashboard/admin/overview/admin-dashboard-page";
+
+export default function Page() {
+	return <AdminDashboardPage />;
 }
