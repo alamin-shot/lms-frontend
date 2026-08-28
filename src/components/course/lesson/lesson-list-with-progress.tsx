@@ -44,7 +44,7 @@ export function LessonListWithProgress({
 						className='flex items-center gap-4 p-4 rounded-lg border border-border/50 hover:border-purple-500/30 transition-colors group'
 					>
 						{/* Status Icon */}
-						<div className='flex-shrink-0'>
+						<div className='shrink-0'>
 							{isCompleted ? (
 								<CheckCircle2 className='h-5 w-5 text-green-500' />
 							) : (
@@ -74,7 +74,7 @@ export function LessonListWithProgress({
 						</div>
 
 						{/* Actions */}
-						<div className='flex-shrink-0 flex items-center gap-2'>
+						<div className='shrink-0 flex items-center gap-2'>
 							<Link href={`/courses/${courseSlug}/lessons/${lesson.id}`}>
 								<Button variant='ghost' size='sm' className='gap-1'>
 									<Play className='h-3 w-3' /> Watch
