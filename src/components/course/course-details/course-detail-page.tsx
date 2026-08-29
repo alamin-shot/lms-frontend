@@ -9,6 +9,7 @@ import { LessonListWithProgress } from '../lesson/lesson-list-with-progress';
 import { RoleAwareBackButton } from '@/components/ui/role-aware-back-button';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 export function CourseDetailPage({
 	course,
@@ -17,9 +18,11 @@ export function CourseDetailPage({
 	onProgressUpdate,
 }: CourseDetailPageProps) {
 	const lessons = course.lessons || [];
+	const [enrolled, setEnrolled] = useState(isEnrolled);
 
 	const handleEnroll = () => {
-		console.log('Enroll clicked');
+		setEnrolled(true);
+		onProgressUpdate?.([]);
 	};
 
 	return (
@@ -34,7 +37,7 @@ export function CourseDetailPage({
 
 					<div className='flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 rounded-xl border border-border/50 bg-card/30'>
 						<div className='w-full md:w-1/2'>
-							{isEnrolled ? (
+							{enrolled ? (
 								<CourseProgressBar
 									progress={0}
 									completedCount={initialCompletedLessonIds.length}
@@ -46,7 +49,11 @@ export function CourseDetailPage({
 								</p>
 							)}
 						</div>
-						<EnrollmentButton isEnrolled={isEnrolled} onEnroll={handleEnroll} />
+						<EnrollmentButton
+							courseId={course.id}
+							isEnrolled={enrolled}
+							onEnroll={handleEnroll}
+						/>
 					</div>
 
 					<LessonListWithProgress
@@ -56,7 +63,7 @@ export function CourseDetailPage({
 						onProgressUpdate={onProgressUpdate}
 					/>
 
-					{isEnrolled && (
+					{enrolled && (
 						<div className='mt-8 p-6 rounded-xl border border-purple-500/30 bg-purple-500/10'>
 							<div className='flex items-center justify-between'>
 								<div>

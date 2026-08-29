@@ -2,41 +2,64 @@
 
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { enrollmentService } from '@/services/enrollment.service';
+import { toast } from 'sonner';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 interface EnrollmentButtonProps {
-  isEnrolled: boolean;
-  onEnroll?: () => void;
+	courseId: number;
+	isEnrolled: boolean;
+	onEnroll?: () => void;
 }
 
 export function EnrollmentButton({
-  isEnrolled,
-  onEnroll,
+	courseId,
+	isEnrolled,
+	onEnroll,
 }: EnrollmentButtonProps) {
-  const [loading, setLoading] = useState(false);
+	const { isAuthenticated } = useAuth();
+	const router = useRouter();
+	const [loading, setLoading] = useState(false);
+	const [enrolled, setEnrolled] = useState(isEnrolled);
 
-  const handleEnroll = async () => {
-    setLoading(true);
-    // TODO: Call API to enroll
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setLoading(false);
-    onEnroll?.();
-  };
+	const handleEnroll = async () => {
+		// Check if user is logged in
+		if (!isAuthenticated) {
+			toast.error('Please login to enroll in this course');
+			router.push('/login');
+			return;
+		}
 
-  if (isEnrolled) {
-    return (
-      <Button variant="outline" className="w-full md:w-auto" disabled>
-        ✅ Enrolled
-      </Button>
-    );
-  }
+		setLoading(true);
+		try {
+			await enrollmentService.enroll(courseId);
+			setEnrolled(true);
+			toast.success('Successfully enrolled in the course!');
+			onEnroll?.();
+		} catch (error) {
+			toast.error('Failed to enroll. Please try again.');
+			console.error('Enrollment error:', error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  return (
-    <Button
-      className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
-      onClick={handleEnroll}
-      disabled={loading}
-    >
-      {loading ? 'Enrolling...' : 'Enroll Now'}
-    </Button>
-  );
+	if (enrolled) {
+		return (
+			<Button variant='outline' className='w-full md:w-auto' disabled>
+				✅ Enrolled
+			</Button>
+		);
+	}
+
+	return (
+		<Button
+			className='w-full md:w-auto bg-purple-600 hover:bg-purple-700'
+			onClick={handleEnroll}
+			disabled={loading}
+		>
+			{loading ? 'Enrolling...' : 'Enroll Now'}
+		</Button>
+	);
 }

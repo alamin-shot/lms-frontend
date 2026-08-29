@@ -1,6 +1,7 @@
 import { HomePage } from '@/components/home';
-import { featuredCourses } from '@/mocks';
+import { courseService } from '@/services/course.service';
 
-export default function Home() {
-	return <HomePage courses={featuredCourses} />;
+export default async function Home() {
+	const courses = await courseService.getAll();
+	return <HomePage courses={courses} />;
 }

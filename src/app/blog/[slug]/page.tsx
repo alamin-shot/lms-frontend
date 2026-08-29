@@ -1,5 +1,5 @@
 import { BlogDetailPage } from '@/components/blog';
-import { blogPosts } from '@/mocks';
+import { blogService } from '@/services/blog.service';
 import { notFound } from 'next/navigation';
 
 export default async function BlogDetailPageRoute({
@@ -8,7 +8,13 @@ export default async function BlogDetailPageRoute({
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	const post = blogPosts.find((p) => p.documentId === slug);
+
+	let post;
+	try {
+		post = await blogService.getBySlug(slug);
+	} catch {
+		notFound();
+	}
 
 	if (!post) {
 		notFound();

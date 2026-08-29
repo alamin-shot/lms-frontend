@@ -1,9 +1,13 @@
 import { Container } from '@/components/ui/container';
-import { enrolledCourses } from '@/mocks';
-import { EnrolledCourseCard } from './enrolled-course-card';
+import { EnrolledCourseCard } from './enrolled-course-card'; // ← Changed
+import { DashboardCourse } from '@/types/dashboard.types';
 import Link from 'next/link';
 
-export function StudentDashboardPage() {
+interface StudentDashboardPageProps {
+	courses: DashboardCourse[];
+}
+
+export function StudentDashboardPage({ courses }: StudentDashboardPageProps) {
 	return (
 		<Container className='py-8'>
 			<div className='mb-8'>
@@ -13,10 +17,10 @@ export function StudentDashboardPage() {
 				</p>
 			</div>
 
-			{enrolledCourses.length > 0 ? (
+			{courses.length > 0 ? (
 				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-					{enrolledCourses.map((course) => (
-						<EnrolledCourseCard key={course.id} course={course} />
+					{courses.map((course) => (
+						<EnrolledCourseCard key={course.id} course={course} /> // ← Changed
 					))}
 				</div>
 			) : (

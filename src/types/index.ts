@@ -5,3 +5,5 @@ export * from './quiz.types';
 export * from './blog.types';
 export * from './api.types';
 export * from './content-manager.types';
+export * from './admin.types';
+export * from './dashboard.types';

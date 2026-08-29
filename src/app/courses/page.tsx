@@ -1,6 +1,10 @@
 import { CoursesSection } from '@/components/course';
-import { featuredCourses } from '@/mocks';
+import { courseService } from '@/services/course.service';
 
-export default function CoursesPage() {
-	return <CoursesSection courses={featuredCourses} />;
+export const dynamic = 'force-dynamic';
+
+export default async function CoursesPage() {
+	const courses = await courseService.getAll();
+	console.log('Courses from API:', courses);
+	return <CoursesSection courses={courses} />;
 }

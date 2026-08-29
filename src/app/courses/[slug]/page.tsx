@@ -1,27 +1,9 @@
-import { CourseDetailPage } from '@/components/course/course-details';
-import { featuredCourses } from '@/mocks';
-import { notFound } from 'next/navigation';
+import { LessonPageComponent } from '@/components/course/lesson/lesson-page-component';
 
-export default async function CourseDetailPageRoute({
+export default function LessonPage({
 	params,
 }: {
-	params: Promise<{ slug: string }>;
+	params: Promise<{ slug: string; lessonId: string }>;
 }) {
-	const { slug } = await params;
-	const course = featuredCourses.find((c) => c.slug === slug);
-
-	if (!course) {
-		notFound();
-	}
-
-	return (
-		<CourseDetailPage
-			course={course}
-			isEnrolled={false}
-			initialCompletedLessonIds={[1, 2]}
-			onProgressUpdate={(completedIds) => {
-				console.log('Progress updated:', completedIds);
-			}}
-		/>
-	);
+	return <LessonPageComponent params={params} />;
 }

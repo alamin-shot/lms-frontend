@@ -5,7 +5,10 @@ import Image from 'next/image';
 import { BookOpen } from 'lucide-react';
 
 interface CourseCardProps {
-	course: Course;
+	course: Pick<
+		Course,
+		'id' | 'title' | 'description' | 'coverImage' | 'slug' | 'instructor'
+	>;
 }
 
 export function CourseCard({ course }: CourseCardProps) {

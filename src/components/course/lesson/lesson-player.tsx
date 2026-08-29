@@ -7,6 +7,28 @@ import { Container } from '@/components/ui/container';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 
+const getEmbedUrl = (videoUrl: string): string | null => {
+	try {
+		const url = new URL(videoUrl);
+		const isYouTube =
+			url.hostname === 'youtube.com' ||
+			url.hostname === 'www.youtube.com' ||
+			url.hostname === 'youtu.be';
+
+		if (!isYouTube) return videoUrl;
+
+		const videoId =
+			url.hostname === 'youtu.be'
+				? url.pathname.slice(1)
+				: url.searchParams.get('v') ||
+					url.pathname.match(/^\/embed\/([^/]+)/)?.[1];
+
+		return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+	} catch {
+		return null;
+	}
+};
+
 export function LessonPlayer({
 	course,
 	lesson,
@@ -18,6 +40,7 @@ export function LessonPlayer({
 }: LessonPlayerProps) {
 	const totalLessons = allLessons.length;
 	const currentIndex = allLessons.findIndex((l) => l.id === lesson.id) + 1;
+	const embedUrl = lesson.videoUrl ? getEmbedUrl(lesson.videoUrl) : null;
 
 	return (
 		<Container className='py-8'>
@@ -48,12 +71,13 @@ export function LessonPlayer({
 
 			{/* Video or Content */}
 			<div className='mb-8'>
-				{lesson.videoUrl ? (
+				{embedUrl ? (
 					<div className='aspect-video rounded-xl overflow-hidden bg-muted'>
 						<iframe
-							src={lesson.videoUrl}
+							src={embedUrl}
 							title={lesson.title}
 							className='w-full h-full'
+							allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
 							allowFullScreen
 						/>
 					</div>
@@ -85,18 +109,14 @@ export function LessonPlayer({
 
 				<div className='flex gap-2'>
 					{prevLesson && (
-						<Link
-							href={`/dashboard/student/courses/${course.slug}/lessons/${prevLesson.id}`}
-						>
+						<Link href={`/courses/${course.slug}/lessons/${prevLesson.id}`}>
 							<Button variant='outline' className='gap-1'>
 								<ChevronLeft className='h-4 w-4' /> Previous
 							</Button>
 						</Link>
 					)}
 					{nextLesson && (
-						<Link
-							href={`/dashboard/student/courses/${course.slug}/lessons/${nextLesson.id}`}
-						>
+						<Link href={`/courses/${course.slug}/lessons/${nextLesson.id}`}>
 							<Button variant='outline' className='gap-1'>
 								Next <ChevronRight className='h-4 w-4' />
 							</Button>

@@ -27,6 +27,11 @@ export interface Lesson {
 	publishedAt: string;
 }
 
+export type LessonSummary = Pick<
+	Lesson,
+	'id' | 'documentId' | 'title' | 'order'
+>;
+
 export interface CourseProgress {
 	courseId: number;
 	completedCount: number;

@@ -16,8 +16,9 @@ apiClient.interceptors.request.use(
 		const skipAuthPaths = ['/api/auth/local', '/api/registration/register'];
 		const shouldSkip = skipAuthPaths.some((path) => config.url?.includes(path));
 
-		if (!shouldSkip) {
+		if (!shouldSkip && typeof window !== 'undefined') {
 			const token = localStorage.getItem('jwt');
+			console.log('🔍 Token:', token);
 			if (token) {
 				config.headers.Authorization = `Bearer ${token}`;
 			}
@@ -32,8 +33,8 @@ apiClient.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		if (error.response?.status === 401) {
-			localStorage.removeItem('jwt');
 			if (typeof window !== 'undefined') {
+				localStorage.removeItem('jwt');
 				window.location.href = '/login';
 			}
 		}

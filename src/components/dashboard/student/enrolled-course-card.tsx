@@ -1,4 +1,4 @@
-import { Course } from '@/types/course.types';
+import { DashboardCourse } from '@/types/dashboard.types';
 import { getProgressForCourse } from '@/mocks';
 import { ProgressIndicator } from './progress-indicator';
 import Link from 'next/link';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 
 interface EnrolledCourseCardProps {
-	course: Course;
+	course: DashboardCourse; // ← Changed from Course to DashboardCourse
 }
 
 export function EnrolledCourseCard({ course }: EnrolledCourseCardProps) {
@@ -41,7 +41,6 @@ export function EnrolledCourseCard({ course }: EnrolledCourseCardProps) {
 					By {course.instructor?.username || 'Unknown'}
 				</p>
 
-				{/* Progress Indicator */}
 				<ProgressIndicator
 					courseId={course.id}
 					totalLessons={totalLessons}

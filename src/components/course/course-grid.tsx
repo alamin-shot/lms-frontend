@@ -2,7 +2,10 @@ import { Course } from '@/types/course.types';
 import { CourseCard } from './course-card';
 
 interface CourseGridProps {
-	courses: Course[];
+	courses: Pick<
+		Course,
+		'id' | 'title' | 'description' | 'coverImage' | 'slug' | 'instructor'
+	>[];
 	columns?: 1 | 2 | 3 | 4;
 }
 

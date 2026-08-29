@@ -76,3 +76,33 @@ export interface QuizPageProps {
 	quiz: Quiz;
 	courseSlug: string;
 }
+
+export interface QuizAttempt {
+	id: number;
+	documentId: string;
+	score: number;
+	answers: string[];
+	results: QuizResult[];
+	user: {
+		id: number;
+		username: string;
+	};
+	quiz: Quiz;
+	createdAt: string;
+	updatedAt: string;
+	publishedAt: string;
+}
+
+export interface SubmitQuizRequest {
+	quizId: number;
+	answers: string[];
+}
+
+export interface SubmitQuizResponse {
+	id: number;
+	score: number;
+	correctCount: number;
+	totalQuestions: number;
+	results: QuizResult[];
+	passed: boolean;
+}

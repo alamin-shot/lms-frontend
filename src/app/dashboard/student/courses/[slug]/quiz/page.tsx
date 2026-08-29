@@ -1,20 +1,24 @@
-import { QuizPage } from '@/components/quiz/quiz-page';
-import { quizzes } from '@/mocks/quiz';
-import { enrolledCourses } from '@/mocks';
+import { QuizPageComponent } from '@/components/quiz/quiz-page-component';
+import { courseService } from '@/services/course.service';
 import { notFound } from 'next/navigation';
 
-export default async function QuizPageRoute({
+export default async function QuizPage({
 	params,
 }: {
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
 
-	const course = enrolledCourses.find((c) => c.slug === slug);
-	if (!course) notFound();
+	let course;
+	try {
+		course = await courseService.getBySlug(slug);
+	} catch {
+		notFound();
+	}
 
-	const quiz = quizzes.find((q) => q.course?.slug === slug);
-	if (!quiz) notFound();
+	if (!course) {
+		notFound();
+	}
 
-	return <QuizPage quiz={quiz} courseSlug={slug} />;
+	return <QuizPageComponent courseSlug={slug} courseId={course.id} />;
 }
