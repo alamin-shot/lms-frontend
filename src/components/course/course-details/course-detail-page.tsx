@@ -9,7 +9,7 @@ import { LessonListWithProgress } from '../lesson/lesson-list-with-progress';
 import { RoleAwareBackButton } from '@/components/ui/role-aware-back-button';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 
 export function CourseDetailPage({
 	course,
@@ -19,11 +19,29 @@ export function CourseDetailPage({
 }: CourseDetailPageProps) {
 	const lessons = course.lessons || [];
 	const [enrolled, setEnrolled] = useState(isEnrolled);
+	const [completedIds, setCompletedIds] = useState(initialCompletedLessonIds);
+
+	useEffect(() => {
+		const stored = localStorage.getItem(`course-progress:${course.slug}`);
+		if (stored) {
+			startTransition(() => setCompletedIds(JSON.parse(stored)));
+		}
+	}, [course.slug]);
 
 	const handleEnroll = () => {
 		setEnrolled(true);
 		onProgressUpdate?.([]);
 	};
+
+	const handleProgressUpdate = (newCompletedIds: number[]) => {
+		setCompletedIds(newCompletedIds);
+		onProgressUpdate?.(newCompletedIds);
+	};
+
+	const progress =
+		lessons.length > 0
+			? Math.round((completedIds.length / lessons.length) * 100)
+			: 0;
 
 	return (
 		<main className='py-8'>
@@ -39,8 +57,8 @@ export function CourseDetailPage({
 						<div className='w-full md:w-1/2'>
 							{enrolled ? (
 								<CourseProgressBar
-									progress={0}
-									completedCount={initialCompletedLessonIds.length}
+									progress={progress}
+									completedCount={completedIds.length}
 									totalCount={lessons.length}
 								/>
 							) : (
@@ -59,8 +77,8 @@ export function CourseDetailPage({
 					<LessonListWithProgress
 						lessons={lessons}
 						courseSlug={course.slug}
-						initialCompletedIds={initialCompletedLessonIds}
-						onProgressUpdate={onProgressUpdate}
+						initialCompletedIds={completedIds}
+						onProgressUpdate={handleProgressUpdate}
 					/>
 
 					{enrolled && (

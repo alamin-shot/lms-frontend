@@ -1,10 +1,12 @@
+'use client';
+
 import { DashboardCourse } from '@/types/dashboard.types';
-import { getProgressForCourse } from '@/mocks';
 import { ProgressIndicator } from './progress-indicator';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
+import { startTransition, useEffect, useState } from 'react';
 
 interface EnrolledCourseCardProps {
 	course: DashboardCourse; // ← Changed from Course to DashboardCourse
@@ -12,8 +14,16 @@ interface EnrolledCourseCardProps {
 
 export function EnrolledCourseCard({ course }: EnrolledCourseCardProps) {
 	const totalLessons = course.lessons?.length || 0;
-	const progress = getProgressForCourse(course.id);
-	const completedLessonIds = progress?.completedLessonIds || [];
+	const [completedLessonIds, setCompletedLessonIds] = useState<number[]>(
+		Array.from({ length: course.completedCount }, (_, index) => index),
+	);
+
+	useEffect(() => {
+		const stored = localStorage.getItem(`course-progress:${course.slug}`);
+		if (stored) {
+			startTransition(() => setCompletedLessonIds(JSON.parse(stored)));
+		}
+	}, [course.slug]);
 
 	return (
 		<div className='group rounded-xl border border-border/50 bg-card/50 overflow-hidden hover:-translate-y-2 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20'>

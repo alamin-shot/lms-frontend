@@ -4,9 +4,10 @@ import { ApiResponse } from '@/types/api.types';
 import { processCourses, processCourse } from '@/lib/utils/course-helpers';
 
 export const courseService = {
-	async getAll(): Promise<Course[]> {
+	async getAll(token?: string): Promise<Course[]> {
 		const response = await apiClient.get<ApiResponse<Course[]>>(
 			'/api/courses?populate=*',
+			token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
 		);
 		const data = response.data.data;
 		if (!Array.isArray(data)) {
@@ -16,15 +17,30 @@ export const courseService = {
 	},
 
 	async getBySlug(slug: string, token?: string): Promise<Course> {
-		const response = await apiClient.get<ApiResponse<Course[]>>(
-			`/api/courses?filters[slug][$eq]=${slug}&populate[lessons]=true`,
-			token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
-		);
-		const courses = response.data.data;
-		if (!Array.isArray(courses) || courses.length === 0) {
+		try {
+			const response = await apiClient.get<ApiResponse<Course[]>>(
+				`/api/courses?filters[slug][$eq]=${slug}&populate[lessons]=true`,
+				token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+			);
+			const courses = response.data.data;
+			if (Array.isArray(courses) && courses.length > 0) {
+				return processCourse(courses[0]);
+			}
+		} catch {
+			// Fall back to the collection endpoint below.
+		}
+
+		let allCourses: Course[] = [];
+		try {
+			allCourses = await this.getAll(token);
+		} catch {
+			allCourses = await this.getAll();
+		}
+		const fallbackCourse = allCourses.find((course) => course.slug === slug);
+		if (!fallbackCourse) {
 			throw new Error(`Course with slug "${slug}" not found`);
 		}
-		return processCourse(courses[0]);
+		return fallbackCourse;
 	},
 
 	async create(data: Partial<Course>): Promise<Course> {

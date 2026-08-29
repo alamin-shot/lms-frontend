@@ -83,10 +83,7 @@ export interface QuizAttempt {
 	score: number;
 	answers: string[];
 	results: QuizResult[];
-	user: {
-		id: number;
-		username: string;
-	};
+	user: User;
 	quiz: Quiz;
 	createdAt: string;
 	updatedAt: string;

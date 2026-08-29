@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { LessonListWithProgressProps } from '@/types/course.types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,11 +16,22 @@ export function LessonListWithProgress({
 	const [completedIds, setCompletedIds] =
 		useState<number[]>(initialCompletedIds);
 
+	useEffect(() => {
+		const stored = localStorage.getItem(`course-progress:${courseSlug}`);
+		if (stored) {
+			startTransition(() => setCompletedIds(JSON.parse(stored)));
+		}
+	}, [courseSlug]);
+
 	const toggleComplete = (lessonId: number) => {
 		const newCompletedIds = completedIds.includes(lessonId)
 			? completedIds.filter((id) => id !== lessonId)
 			: [...completedIds, lessonId];
 		setCompletedIds(newCompletedIds);
+		localStorage.setItem(
+			`course-progress:${courseSlug}`,
+			JSON.stringify(newCompletedIds),
+		);
 		onProgressUpdate?.(newCompletedIds);
 	};
 

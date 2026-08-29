@@ -10,8 +10,6 @@ export interface Progress {
 		title: string;
 		course?: {
 			id: number;
-			documentId: string;
-			title: string;
 		};
 	};
 	user: {
@@ -35,6 +33,7 @@ interface ApiResponse<T> {
 }
 
 export const progressService = {
+	// Toggle lesson completion
 	async toggleComplete(lessonId: number): Promise<{
 		progress: Progress;
 		courseProgress: number;
@@ -47,6 +46,7 @@ export const progressService = {
 		return response.data;
 	},
 
+	// Get progress for a specific course
 	async getCourseProgress(
 		courseId: number,
 		token?: string,
@@ -63,6 +63,7 @@ export const progressService = {
 		return response.data;
 	},
 
+	// Get all progress for the current user
 	async getAllProgress(token?: string): Promise<Progress[]> {
 		const response = await apiClient.get<ApiResponse<Progress[]>>(
 			'/api/progress?populate[lesson][populate][course]=true&populate[user]=true',

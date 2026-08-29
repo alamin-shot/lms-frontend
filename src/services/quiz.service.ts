@@ -1,10 +1,5 @@
 import { apiClient } from '@/lib/api/client';
-import {
-	Quiz,
-	Question,
-	SubmitQuizRequest,
-	SubmitQuizResponse,
-} from '@/types/quiz.types';
+import { Quiz, Question, SubmitQuizResponse } from '@/types/quiz.types';
 
 interface ApiResponse<T> {
 	data: T;
@@ -18,24 +13,44 @@ interface ApiResponse<T> {
 	};
 }
 
+
+interface QuizAttempt {
+	id: number;
+	documentId: string;
+	score: number;
+	answers: string[];
+	results: {
+		questionId: number;
+		userAnswer: string;
+		correctAnswer: string;
+		isCorrect: boolean;
+	}[];
+	user: {
+		id: number;
+		username: string;
+	};
+	quiz: Quiz;
+	createdAt: string;
+	updatedAt: string;
+	publishedAt: string;
+}
+
 export const quizService = {
-	// Get quiz for a course
 	async getQuizByCourse(courseId: number): Promise<Quiz | null> {
-		try {
-			const response = await apiClient.get<ApiResponse<Quiz[]>>(
-				`/api/quizzes?filters[course][id][$eq]=${courseId}&populate[questions]=true`,
-			);
-			const quizzes = response.data.data;
-			if (!Array.isArray(quizzes) || quizzes.length === 0) {
-				return null;
-			}
-			return quizzes[0];
-		} catch {
-			return null;
-		}
+		const quizResponse = await apiClient.get<ApiResponse<Quiz[]>>(
+			`/api/quizzes?filters[course][id][$eq]=${courseId}`,
+		);
+		const quiz = quizResponse.data.data[0];
+		if (!quiz) return null;
+
+		const questionsResponse = await apiClient.get<ApiResponse<Question[]>>(
+			`/api/questions?filters[quiz][id][$eq]=${quiz.id}`,
+		);
+		quiz.questions = questionsResponse.data.data;
+
+		return quiz;
 	},
 
-	// Get questions for a quiz
 	async getQuestions(quizId: number): Promise<Question[]> {
 		const response = await apiClient.get<ApiResponse<Question[]>>(
 			`/api/questions?filters[quiz][id][$eq]=${quizId}`,
@@ -43,7 +58,6 @@ export const quizService = {
 		return response.data.data;
 	},
 
-	// Submit quiz answers
 	async submitQuiz(
 		quizId: number,
 		answers: string[],
@@ -58,10 +72,9 @@ export const quizService = {
 		return response.data;
 	},
 
-	// Get quiz attempts for a student
-	async getAttempts(quizId: number): Promise<any[]> {
+	async getAttempts(quizId: number): Promise<QuizAttempt[]> {
 		try {
-			const response = await apiClient.get<ApiResponse<any[]>>(
+			const response = await apiClient.get<ApiResponse<QuizAttempt[]>>(
 				`/api/quiz-attempts?filters[quiz][id][$eq]=${quizId}`,
 			);
 			return response.data.data;
