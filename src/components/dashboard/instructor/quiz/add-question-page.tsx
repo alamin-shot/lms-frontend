@@ -3,25 +3,24 @@
 import { Container } from '@/components/ui/container';
 import { QuestionForm } from './question-form';
 import { QuestionFormData } from '@/lib/validations/quiz.schema';
-import { Quiz } from '@/types/quiz.types';
+import { AddQuestionPageProps } from '@/types/instructor.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
-import { Course } from '@/types/course.types';
-
-interface AddQuestionPageProps {
-	course: Course;
-	quiz: Quiz;
-}
+import { questionService } from '@/services/question.service';
 
 export function AddQuestionPage({ course, quiz }: AddQuestionPageProps) {
 	const router = useRouter();
 
-	const handleSubmit = (data: QuestionFormData) => {
-		console.log('New question:', data);
-		toast.success('Question added successfully!');
-		router.push(`/dashboard/instructor/courses/${course.id}/quiz/questions`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: QuestionFormData) => {
+		try {
+			await questionService.create(quiz.id, data);
+			toast.success('Question added successfully!');
+			router.push(`/dashboard/instructor/courses/${course.id}/quiz/questions`);
+		} catch (error) {
+			console.error('Error adding question:', error);
+			toast.error('Failed to add question. Please try again.');
+		}
 	};
 
 	return (

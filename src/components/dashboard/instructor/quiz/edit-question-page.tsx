@@ -3,17 +3,11 @@
 import { Container } from '@/components/ui/container';
 import { QuestionForm } from './question-form';
 import { QuestionFormData } from '@/lib/validations/quiz.schema';
-import { Quiz, Question } from '@/types/quiz.types';
+import { EditQuestionPageProps } from '@/types/instructor.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
-import { Course } from '@/types/course.types';
-
-interface EditQuestionPageProps {
-	course: Course;
-	quiz: Quiz;
-	question: Question;
-}
+import { questionService } from '@/services/question.service';
 
 export function EditQuestionPage({
 	course,
@@ -28,11 +22,15 @@ export function EditQuestionPage({
 		correctAnswer: question.correctAnswer,
 	};
 
-	const handleSubmit = (data: QuestionFormData) => {
-		console.log('Updated question:', data);
-		toast.success('Question updated successfully!');
-		router.push(`/dashboard/instructor/courses/${course.id}/quiz/questions`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: QuestionFormData) => {
+		try {
+			await questionService.update(question.id, data, question.documentId);
+			toast.success('Question updated successfully!');
+			router.push(`/dashboard/instructor/courses/${course.id}/quiz/questions`);
+		} catch (error) {
+			console.error('Error updating question:', error);
+			toast.error('Failed to update question. Please try again.');
+		}
 	};
 
 	return (

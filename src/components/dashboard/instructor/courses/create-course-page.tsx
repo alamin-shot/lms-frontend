@@ -6,15 +6,20 @@ import { CourseFormData } from '@/lib/validations/course.schema';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
+import { courseService } from '@/services/course.service';
 
 export function CreateCoursePage() {
 	const router = useRouter();
 
-	const handleSubmit = (data: CourseFormData) => {
-		console.log('New course:', data);
-		toast.success('Course created successfully!');
-		router.push('/dashboard/instructor');
-		// TODO: Save to backend
+	const handleSubmit = async (data: CourseFormData) => {
+		try {
+			await courseService.create(data);
+			toast.success('Course created successfully!');
+			router.push('/dashboard/instructor');
+		} catch (error) {
+			console.error('Error creating course:', error);
+			toast.error('Failed to create course. Please try again.');
+		}
 	};
 
 	return (

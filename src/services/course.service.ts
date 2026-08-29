@@ -3,6 +3,13 @@ import { Course } from '@/types/course.types';
 import { ApiResponse } from '@/types/api.types';
 import { processCourses, processCourse } from '@/lib/utils/course-helpers';
 
+const toRichText = (text: string) => [
+	{
+		type: 'paragraph',
+		children: [{ type: 'text', text }],
+	},
+];
+
 export const courseService = {
 	async getAll(token?: string): Promise<Course[]> {
 		const response = await apiClient.get<ApiResponse<Course[]>>(
@@ -14,6 +21,17 @@ export const courseService = {
 			return [];
 		}
 		return processCourses(data);
+	},
+	async getById(id: number, token?: string): Promise<Course> {
+		const response = await apiClient.get<ApiResponse<Course[]>>(
+			`/api/courses?filters[id][$eq]=${id}&populate[lessons]=true`,
+			token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+		);
+		const course = response.data.data[0];
+		if (!course) {
+			throw new Error(`Course with id ${id} not found`);
+		}
+		return processCourse(course);
 	},
 
 	async getBySlug(slug: string, token?: string): Promise<Course> {
@@ -44,21 +62,39 @@ export const courseService = {
 	},
 
 	async create(data: Partial<Course>): Promise<Course> {
+		const payload = {
+			...data,
+			description:
+				typeof data.description === 'string'
+					? toRichText(data.description)
+					: (data.description ?? []),
+		};
 		const response = await apiClient.post<ApiResponse<Course>>('/api/courses', {
-			data,
+			data: payload,
 		});
 		return response.data.data;
 	},
 
-	async update(id: number, data: Partial<Course>): Promise<Course> {
+	async update(
+		id: number,
+		data: Partial<Course>,
+		documentId?: string,
+	): Promise<Course> {
+		const payload = {
+			...data,
+			description:
+				typeof data.description === 'string'
+					? toRichText(data.description)
+					: (data.description ?? []),
+		};
 		const response = await apiClient.put<ApiResponse<Course>>(
-			`/api/courses/${id}`,
-			{ data },
+			`/api/courses/${documentId || id}`,
+			{ data: payload },
 		);
 		return response.data.data;
 	},
 
-	async delete(id: number): Promise<void> {
-		await apiClient.delete(`/api/courses/${id}`);
+	async delete(id: number, documentId?: string): Promise<void> {
+		await apiClient.delete(`/api/courses/${documentId || id}`);
 	},
 };

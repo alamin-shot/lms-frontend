@@ -1,19 +1,19 @@
 'use client';
 
 import { Container } from '@/components/ui/container';
-import { instructorCourses } from '@/mocks';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { InstructorStats } from './instructor-stats';
 import { InstructorCourseList } from './instructor-course-list';
+import { InstructorDashboardPageProps } from '@/types/instructor.types';
 
-export function InstructorDashboardPage() {
-	const courses = instructorCourses;
-
+export function InstructorDashboardPage({
+	courses,
+}: InstructorDashboardPageProps) {
 	const handleDelete = (courseId: number) => {
 		console.log('Delete course:', courseId);
-		// TODO: Implement delete
+		// TODO: Implement delete with API
 	};
 
 	return (

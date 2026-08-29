@@ -1,11 +1,7 @@
 import { Container } from '@/components/ui/container';
-import { Course } from '@/types/course.types';
 import { StudentProgress } from './student-progress';
 import BackButton from '@/components/ui/back-button';
-
-interface StudentProgressPageProps {
-	course: Course;
-}
+import { StudentProgressPageProps } from '@/types/instructor.types';
 
 export function StudentProgressPage({ course }: StudentProgressPageProps) {
 	return (

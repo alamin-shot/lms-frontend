@@ -1,22 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Course } from '@/types/course.types';
-import { Quiz } from '@/types/quiz.types';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
-import { useState } from 'react';
 import { DeleteConfirmationModal } from '@/components/ui/delete-confirmation-modal';
-
-interface ManageQuestionsPageProps {
-	course: Course;
-	quiz: Quiz;
-	onDeleteQuestion?: (questionId: number) => void;
-}
+import { ManageQuestionsPageProps } from '@/types/instructor.types';
+import { questionService } from '@/services/question.service';
+import { toast } from 'sonner';
 
 export function ManageQuestionsPage({
 	course,
@@ -28,17 +23,35 @@ export function ManageQuestionsPage({
 	const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
 		null,
 	);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleDeleteClick = (questionId: number) => {
 		setSelectedQuestionId(questionId);
 		setShowDeleteModal(true);
 	};
 
-	const handleConfirmDelete = () => {
+	const handleConfirmDelete = async () => {
 		if (selectedQuestionId) {
-			onDeleteQuestion?.(selectedQuestionId);
-			setShowDeleteModal(false);
-			setSelectedQuestionId(null);
+			setIsDeleting(true);
+			try {
+				const questionToDelete = questions.find(
+					(question) => question.id === selectedQuestionId,
+				);
+				await questionService.delete(
+					selectedQuestionId,
+					questionToDelete?.documentId,
+				);
+				toast.success('Question deleted successfully!');
+				onDeleteQuestion?.(selectedQuestionId);
+				window.location.reload();
+			} catch (error) {
+				console.error('Error deleting question:', error);
+				toast.error('Failed to delete question. Please try again.');
+			} finally {
+				setIsDeleting(false);
+				setShowDeleteModal(false);
+				setSelectedQuestionId(null);
+			}
 		}
 	};
 
@@ -116,6 +129,7 @@ export function ManageQuestionsPage({
 													size='sm'
 													className='text-red-500 hover:text-red-600'
 													onClick={() => handleDeleteClick(question.id)}
+													disabled={isDeleting}
 												>
 													<Trash2 className='h-3 w-3' />
 												</Button>
@@ -146,6 +160,7 @@ export function ManageQuestionsPage({
 				onConfirm={handleConfirmDelete}
 				title='Delete Question'
 				description='Are you sure you want to delete this question? This action cannot be undone.'
+				isLoading={isDeleting}
 			/>
 		</>
 	);

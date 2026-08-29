@@ -1,20 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Course } from '@/types/course.types';
 import { Plus, Edit, Trash2, GripVertical } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
-import { useState } from 'react';
 import { DeleteConfirmationModal } from '@/components/ui/delete-confirmation-modal';
-
-interface ManageLessonsPageProps {
-	course: Course;
-	onDeleteLesson?: (lessonId: number) => void;
-}
+import { ManageLessonsPageProps } from '@/types/instructor.types';
+import { lessonService } from '@/services/lesson.service';
+import { toast } from 'sonner';
 
 export function ManageLessonsPage({
 	course,
@@ -24,17 +21,35 @@ export function ManageLessonsPage({
 	const sortedLessons = [...lessons].sort((a, b) => a.order - b.order);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleDeleteClick = (lessonId: number) => {
 		setSelectedLessonId(lessonId);
 		setShowDeleteModal(true);
 	};
 
-	const handleConfirmDelete = () => {
+	const handleConfirmDelete = async () => {
 		if (selectedLessonId) {
-			onDeleteLesson?.(selectedLessonId);
-			setShowDeleteModal(false);
-			setSelectedLessonId(null);
+			setIsDeleting(true);
+			try {
+				const lessonToDelete = sortedLessons.find(
+					(lesson) => lesson.id === selectedLessonId,
+				);
+				await lessonService.delete(
+					selectedLessonId,
+					lessonToDelete?.documentId,
+				);
+				toast.success('Lesson deleted successfully!');
+				onDeleteLesson?.(selectedLessonId);
+				window.location.reload();
+			} catch (error) {
+				console.error('Error deleting lesson:', error);
+				toast.error('Failed to delete lesson. Please try again.');
+			} finally {
+				setIsDeleting(false);
+				setShowDeleteModal(false);
+				setSelectedLessonId(null);
+			}
 		}
 	};
 
@@ -46,7 +61,6 @@ export function ManageLessonsPage({
 				</div>
 
 				<div className='space-y-6'>
-					{/* Header */}
 					<div className='flex items-center justify-between'>
 						<div>
 							<h1 className='text-3xl font-bold'>{course.title}</h1>
@@ -63,7 +77,6 @@ export function ManageLessonsPage({
 						</Link>
 					</div>
 
-					{/* Lessons List */}
 					{sortedLessons.length > 0 ? (
 						<div className='space-y-3'>
 							{sortedLessons.map((lesson) => (
@@ -94,6 +107,7 @@ export function ManageLessonsPage({
 												size='sm'
 												className='text-red-500 hover:text-red-600'
 												onClick={() => handleDeleteClick(lesson.id)}
+												disabled={isDeleting}
 											>
 												<Trash2 className='h-3 w-3' />
 											</Button>
@@ -116,12 +130,14 @@ export function ManageLessonsPage({
 					)}
 				</div>
 			</Container>
+
 			<DeleteConfirmationModal
 				isOpen={showDeleteModal}
 				onClose={() => setShowDeleteModal(false)}
 				onConfirm={handleConfirmDelete}
 				title='Delete Lesson'
 				description='Are you sure you want to delete this lesson? This action cannot be undone.'
+				isLoading={isDeleting}
 			/>
 		</>
 	);

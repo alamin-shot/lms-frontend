@@ -21,7 +21,6 @@ export function QuizPageComponent({
 	const { isAuthenticated } = useAuth();
 	const [quiz, setQuiz] = useState<Quiz | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [isComplete, setIsComplete] = useState(false);
 
 	useEffect(() => {
 		if (!isAuthenticated) {
@@ -42,9 +41,9 @@ export function QuizPageComponent({
 		fetchQuiz();
 	}, [courseId, isAuthenticated]);
 
-	const handleQuizComplete = async (score: number, answers: string[]) => {
-		setIsComplete(true);
-		// The score is already saved by the QuizTaker
+	const handleQuizComplete = (score: number) => {
+		console.log('Quiz completed with score:', score);
+		// The QuizTaker handles the results display
 	};
 
 	if (loading) {
@@ -75,23 +74,6 @@ export function QuizPageComponent({
 						href={`/dashboard/student/courses/${courseSlug}`}
 						label='Back to Course'
 					/>
-				</div>
-			</Container>
-		);
-	}
-
-	if (isComplete) {
-		return (
-			<Container className='py-8'>
-				<div className='mb-6'>
-					<BackButton
-						href={`/dashboard/student/courses/${courseSlug}`}
-						label='Back to Course'
-					/>
-				</div>
-				<div className='text-center py-12'>
-					<h3 className='text-lg font-semibold'>Quiz Complete!</h3>
-					<p className='text-muted-foreground'>Check your results above.</p>
 				</div>
 			</Container>
 		);

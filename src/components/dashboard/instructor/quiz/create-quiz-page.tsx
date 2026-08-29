@@ -3,23 +3,24 @@
 import { Container } from '@/components/ui/container';
 import { QuizForm } from './quiz-form';
 import { QuizFormData } from '@/lib/validations/quiz.schema';
-import { Course } from '@/types/course.types';
+import { CreateQuizPageProps } from '@/types/instructor.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
-
-interface CreateQuizPageProps {
-	course: Course;
-}
+import { quizService } from '@/services/quiz.service';
 
 export function CreateQuizPage({ course }: CreateQuizPageProps) {
 	const router = useRouter();
 
-	const handleSubmit = (data: QuizFormData) => {
-		console.log('New quiz:', data);
-		toast.success('Quiz created successfully!');
-		router.push(`/dashboard/instructor/courses/${course.id}/quiz`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: QuizFormData) => {
+		try {
+			await quizService.create(course.id, data);
+			toast.success('Quiz created successfully!');
+			router.push(`/dashboard/instructor/courses/${course.id}/quiz`);
+		} catch (error) {
+			console.error('Error creating quiz:', error);
+			toast.error('Failed to create quiz. Please try again.');
+		}
 	};
 
 	return (

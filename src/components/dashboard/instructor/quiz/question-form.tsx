@@ -16,12 +16,7 @@ import {
 	questionSchema,
 	QuestionFormData,
 } from '@/lib/validations/quiz.schema';
-
-interface QuestionFormProps {
-	defaultValues?: Partial<QuestionFormData>;
-	onSubmit: (data: QuestionFormData) => void;
-	isLoading?: boolean;
-}
+import { QuestionFormProps } from '@/types/instructor.types';
 
 export function QuestionForm({
 	defaultValues,
@@ -31,7 +26,6 @@ export function QuestionForm({
 	const {
 		register,
 		handleSubmit,
-		control,
 		watch,
 		setValue,
 		formState: { errors },

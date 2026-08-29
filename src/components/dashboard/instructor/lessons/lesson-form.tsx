@@ -7,12 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { lessonSchema, LessonFormData } from '@/lib/validations/lesson.schema';
-
-interface LessonFormProps {
-	defaultValues?: Partial<LessonFormData>;
-	onSubmit: (data: LessonFormData) => void;
-	isLoading?: boolean;
-}
+import { LessonFormProps } from '@/types/instructor.types';
 
 export function LessonForm({
 	defaultValues,

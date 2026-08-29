@@ -1,22 +1,17 @@
-"use client";
+'use client';
 
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Course } from '@/types/course.types';
-import { Quiz } from '@/types/quiz.types';
-import { Plus, Edit, FileQuestion } from 'lucide-react';
+import { Plus, Edit, FileQuestion, Trash2 } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
 import { useState } from 'react';
 import { DeleteConfirmationModal } from '@/components/ui/delete-confirmation-modal';
-
-interface ManageQuizPageProps {
-	course: Course;
-	quiz?: Quiz | null;
-	onDeleteQuiz?: () => void;
-}
+import { ManageQuizPageProps } from '@/types/instructor.types';
+import { quizService } from '@/services/quiz.service';
+import { toast } from 'sonner';
 
 export function ManageQuizPage({
 	course,
@@ -25,10 +20,23 @@ export function ManageQuizPage({
 }: ManageQuizPageProps) {
 	const hasQuiz = !!quiz;
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 
-	const handleDeleteQuiz = () => {
-		onDeleteQuiz?.();
-		setShowDeleteModal(false);
+	const handleDeleteQuiz = async () => {
+		if (!quiz) return;
+		setIsDeleting(true);
+		try {
+			await quizService.delete(quiz.id, quiz.documentId);
+			toast.success('Quiz deleted successfully!');
+			onDeleteQuiz?.();
+			window.location.reload();
+		} catch (error) {
+			console.error('Error deleting quiz:', error);
+			toast.error('Failed to delete quiz. Please try again.');
+		} finally {
+			setIsDeleting(false);
+			setShowDeleteModal(false);
+		}
 	};
 
 	return (
@@ -50,13 +58,23 @@ export function ManageQuizPage({
 							</p>
 						</div>
 						{hasQuiz ? (
-							<Link
-								href={`/dashboard/instructor/courses/${course.id}/quiz/edit`}
-							>
-								<Button className='bg-purple-600 hover:bg-purple-700'>
-									<Edit className='h-4 w-4 mr-2' /> Edit Quiz
+							<div className='flex gap-2'>
+								<Link
+									href={`/dashboard/instructor/courses/${course.id}/quiz/edit`}
+								>
+									<Button className='bg-purple-600 hover:bg-purple-700'>
+										<Edit className='h-4 w-4 mr-2' /> Edit Quiz
+									</Button>
+								</Link>
+								<Button
+									variant='outline'
+									className='text-red-500 hover:text-red-600'
+									onClick={() => setShowDeleteModal(true)}
+									disabled={isDeleting}
+								>
+									<Trash2 className='h-4 w-4 mr-2' /> Delete
 								</Button>
-							</Link>
+							</div>
 						) : (
 							<Link
 								href={`/dashboard/instructor/courses/${course.id}/quiz/create`}
@@ -119,6 +137,7 @@ export function ManageQuizPage({
 				onConfirm={handleDeleteQuiz}
 				title='Delete Quiz'
 				description={`Are you sure you want to delete "${quiz?.title}"? All questions will also be deleted. This action cannot be undone.`}
+				isLoading={isDeleting}
 			/>
 		</>
 	);

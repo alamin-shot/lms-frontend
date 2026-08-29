@@ -1,17 +1,79 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import {
-	getStudentsForCourse,
-	getProgressPercentage,
-} from '@/mocks/student-progress';
-
-interface StudentProgressProps {
-	courseId: number;
-}
+import { enrollmentService } from '@/services/enrollment.service';
+import { progressService } from '@/services/progress.service';
+import { StudentData, StudentProgressProps } from '@/types/instructor.types';
+import { toast } from 'sonner';
 
 export function StudentProgress({ courseId }: StudentProgressProps) {
-	const students = getStudentsForCourse(courseId);
+	const [students, setStudents] = useState<StudentData[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		const fetchStudents = async () => {
+			try {
+				// 1. Get all enrollments for this course
+				const enrollments = await enrollmentService.getUserEnrollments();
+				const courseEnrollments = enrollments.filter(
+					(e) => e.course.id === courseId,
+				);
+
+				if (courseEnrollments.length === 0) {
+					setStudents([]);
+					setLoading(false);
+					return;
+				}
+
+				// 2. Get progress for each student
+				const studentData: StudentData[] = await Promise.all(
+					courseEnrollments.map(async (enrollment) => {
+						const userId = enrollment.user.id;
+						const progressData =
+							await progressService.getCourseProgress(courseId);
+						const userProgress = progressData.progress.filter(
+							(p) => p.user.id === userId,
+						);
+						const completedLessons = userProgress
+							.filter((p) => p.completed)
+							.map((p) => p.lesson.id);
+
+						const totalLessons = enrollment.course.lessons?.length || 0;
+
+						return {
+							id: enrollment.id,
+							studentName: enrollment.user.username,
+							studentEmail: enrollment.user.email,
+							completedLessons,
+							totalLessons,
+						};
+					}),
+				);
+
+				setStudents(studentData);
+			} catch (error) {
+				console.error('Error fetching student progress:', error);
+				const message =
+					'Student progress is unavailable because Strapi permissions for enrollments/progress are not enabled.';
+				toast.error(message);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchStudents();
+	}, [courseId]);
+
+	if (loading) {
+		return (
+			<div className='text-center py-8 text-muted-foreground'>
+				Loading student progress...
+			</div>
+		);
+	}
 
 	if (students.length === 0) {
 		return (
@@ -28,10 +90,13 @@ export function StudentProgress({ courseId }: StudentProgressProps) {
 			</div>
 			<div className='space-y-3'>
 				{students.map((student) => {
-					const progress = getProgressPercentage(
-						student.completedLessons,
-						student.totalLessons,
-					);
+					const progress =
+						student.totalLessons > 0
+							? Math.round(
+									(student.completedLessons.length / student.totalLessons) *
+										100,
+								)
+							: 0;
 					const isComplete = progress === 100;
 
 					return (

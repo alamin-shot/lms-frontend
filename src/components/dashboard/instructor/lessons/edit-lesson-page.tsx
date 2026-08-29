@@ -3,15 +3,11 @@
 import { Container } from '@/components/ui/container';
 import { LessonForm } from './lesson-form';
 import { LessonFormData } from '@/lib/validations/lesson.schema';
-import { Course, Lesson } from '@/types/course.types';
+import { EditLessonPageProps } from '@/types/instructor.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
-
-interface EditLessonPageProps {
-	course: Course;
-	lesson: Lesson;
-}
+import { lessonService } from '@/services/lesson.service';
 
 export function EditLessonPage({ course, lesson }: EditLessonPageProps) {
 	const router = useRouter();
@@ -23,11 +19,15 @@ export function EditLessonPage({ course, lesson }: EditLessonPageProps) {
 		order: lesson.order,
 	};
 
-	const handleSubmit = (data: LessonFormData) => {
-		console.log('Updated lesson:', data);
-		toast.success('Lesson updated successfully!');
-		router.push(`/dashboard/instructor/courses/${course.id}/lessons`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: LessonFormData) => {
+		try {
+			await lessonService.update(lesson.id, data, lesson.documentId);
+			toast.success('Lesson updated successfully!');
+			router.push(`/dashboard/instructor/courses/${course.id}/lessons`);
+		} catch (error) {
+			console.error('Error updating lesson:', error);
+			toast.error('Failed to update lesson. Please try again.');
+		}
 	};
 
 	return (

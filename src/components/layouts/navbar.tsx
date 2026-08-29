@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/lib/store/slices/auth-slice';
-import { GraduationCap, LogOut, User } from 'lucide-react';
+import { GraduationCap, User } from 'lucide-react';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -12,14 +12,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks/use-redux';
+import { useSyncExternalStore } from 'react';
 
 export function Navbar() {
 	const dispatch = useAppDispatch();
 	const router = useRouter();
 	const { user, token } = useAppSelector((state) => state.auth);
+	const isMounted = useSyncExternalStore(
+		() => () => {},
+		() => true,
+		() => false,
+	);
 
-	const isClient = typeof window !== 'undefined';
-	const isAuthenticated = isClient && !!token && !!user;
+	const isAuthenticated = isMounted && !!token && !!user;
 	const roleName =
 		typeof user?.role === 'string' ? user.role : user?.role?.name;
 	const dashboardMap: Record<string, string> = {

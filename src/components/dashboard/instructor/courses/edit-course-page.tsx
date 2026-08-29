@@ -3,14 +3,11 @@
 import { Container } from '@/components/ui/container';
 import { CourseForm } from './course-form';
 import { CourseFormData } from '@/lib/validations/course.schema';
-import { Course } from '@/types/course.types';
+import { EditCoursePageProps } from '@/types/instructor.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
-
-interface EditCoursePageProps {
-	course: Course;
-}
+import { courseService } from '@/services/course.service';
 
 export function EditCoursePage({ course }: EditCoursePageProps) {
 	const router = useRouter();
@@ -22,11 +19,15 @@ export function EditCoursePage({ course }: EditCoursePageProps) {
 		coverImage: course.coverImage || '',
 	};
 
-	const handleSubmit = (data: CourseFormData) => {
-		console.log('Updated course:', data);
-		toast.success('Course updated successfully!');
-		router.push('/dashboard/instructor');
-		// TODO: Save to backend
+	const handleSubmit = async (data: CourseFormData) => {
+		try {
+			await courseService.update(course.id, data, course.documentId);
+			toast.success('Course updated successfully!');
+			router.push('/dashboard/instructor');
+		} catch (error) {
+			console.error('Error updating course:', error);
+			toast.error('Failed to update course. Please try again.');
+		}
 	};
 
 	return (

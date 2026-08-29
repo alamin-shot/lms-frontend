@@ -3,23 +3,24 @@
 import { Container } from '@/components/ui/container';
 import { LessonForm } from './lesson-form';
 import { LessonFormData } from '@/lib/validations/lesson.schema';
-import { Course } from '@/types/course.types';
+import { AddLessonPageProps } from '@/types/instructor.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
-
-interface AddLessonPageProps {
-	course: Course;
-}
+import { lessonService } from '@/services/lesson.service';
 
 export function AddLessonPage({ course }: AddLessonPageProps) {
 	const router = useRouter();
 
-	const handleSubmit = (data: LessonFormData) => {
-		console.log('New lesson:', data);
-		toast.success('Lesson added successfully!');
-		router.push(`/dashboard/instructor/courses/${course.id}/lessons`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: LessonFormData) => {
+		try {
+			await lessonService.create(course.id, data);
+			toast.success('Lesson added successfully!');
+			router.push(`/dashboard/instructor/courses/${course.id}/lessons`);
+		} catch (error) {
+			console.error('Error adding lesson:', error);
+			toast.error('Failed to add lesson. Please try again.');
+		}
 	};
 
 	return (

@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Course } from '@/types/course.types';
-
-interface InstructorStatsProps {
-	courses: Course[];
-}
+import { InstructorStatsProps } from '@/types/instructor.types';
 
 export function InstructorStats({ courses }: InstructorStatsProps) {
+	const totalLessons = courses.reduce(
+		(acc, course) => acc + (course.lessons?.length || 0),
+		0,
+	);
+
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8'>
 			<Card>
@@ -35,9 +36,7 @@ export function InstructorStats({ courses }: InstructorStatsProps) {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<p className='text-2xl font-bold'>
-						{courses.reduce((acc, c) => acc + (c.lessons?.length || 0), 0)}
-					</p>
+					<p className='text-2xl font-bold'>{totalLessons}</p>
 				</CardContent>
 			</Card>
 		</div>

@@ -6,12 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { quizSchema, QuizFormData } from '@/lib/validations/quiz.schema';
-
-interface QuizFormProps {
-	defaultValues?: Partial<QuizFormData>;
-	onSubmit: (data: QuizFormData) => void;
-	isLoading?: boolean;
-}
+import { QuizFormProps } from '@/types/instructor.types';
 
 export function QuizForm({
 	defaultValues,

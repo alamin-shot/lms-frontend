@@ -1,13 +1,8 @@
 'use client';
 
-import { Course } from '@/types/course.types';
+import { InstructorCourseListProps } from '@/types/instructor.types';
 import { InstructorCourseCard } from './instructor-course-card';
 import { BookOpen } from 'lucide-react';
-
-interface InstructorCourseListProps {
-	courses: Course[];
-	onDelete?: (courseId: number) => void;
-}
 
 export function InstructorCourseList({
 	courses,

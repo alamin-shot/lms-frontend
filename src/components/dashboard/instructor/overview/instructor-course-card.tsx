@@ -1,16 +1,15 @@
-import { Course } from '@/types/course.types';
+'use client';
+
+import { useState } from 'react';
+import { InstructorCourseCardProps } from '@/types/instructor.types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { BookOpen, Edit, FileQuestion, Trash2, Users } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
 import { DeleteConfirmationModal } from '@/components/ui/delete-confirmation-modal';
-
-interface InstructorCourseCardProps {
-	course: Course;
-	onDelete?: (courseId: number) => void;
-}
+import { courseService } from '@/services/course.service';
+import { toast } from 'sonner';
 
 export function InstructorCourseCard({
 	course,
@@ -18,14 +17,23 @@ export function InstructorCourseCard({
 }: InstructorCourseCardProps) {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-	const handleDelete = () => {
-		onDelete?.(course.id);
-		setShowDeleteModal(false);
+	const handleDelete = async () => {
+		try {
+			await courseService.delete(course.id, course.documentId);
+			toast.success('Course deleted successfully!');
+			onDelete?.(course.id);
+			window.location.reload();
+		} catch (error) {
+			console.error('Error deleting course:', error);
+			toast.error('Failed to delete course. Please try again.');
+		} finally {
+			setShowDeleteModal(false);
+		}
 	};
 
 	return (
 		<>
-			<Card key={course.id} className='overflow-hidden'>
+			<Card className='overflow-hidden'>
 				<div className='aspect-video overflow-hidden bg-muted'>
 					{course.coverImage ? (
 						<Image

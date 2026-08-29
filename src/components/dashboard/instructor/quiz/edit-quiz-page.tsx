@@ -3,16 +3,11 @@
 import { Container } from '@/components/ui/container';
 import { QuizForm } from './quiz-form';
 import { QuizFormData } from '@/lib/validations/quiz.schema';
-import { Quiz } from '@/types/quiz.types';
+import { EditQuizPageProps } from '@/types/instructor.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import BackButton from '@/components/ui/back-button';
-import { Course } from '@/types/course.types';
-
-interface EditQuizPageProps {
-	course: Course;
-	quiz: Quiz;
-}
+import { quizService } from '@/services/quiz.service';
 
 export function EditQuizPage({ course, quiz }: EditQuizPageProps) {
 	const router = useRouter();
@@ -21,11 +16,15 @@ export function EditQuizPage({ course, quiz }: EditQuizPageProps) {
 		title: quiz.title,
 	};
 
-	const handleSubmit = (data: QuizFormData) => {
-		console.log('Updated quiz:', data);
-		toast.success('Quiz updated successfully!');
-		router.push(`/dashboard/instructor/courses/${course.id}/quiz`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: QuizFormData) => {
+		try {
+			await quizService.update(quiz.id, data, quiz.documentId);
+			toast.success('Quiz updated successfully!');
+			router.push(`/dashboard/instructor/courses/${course.id}/quiz`);
+		} catch (error) {
+			console.error('Error updating quiz:', error);
+			toast.error('Failed to update quiz. Please try again.');
+		}
 	};
 
 	return (
