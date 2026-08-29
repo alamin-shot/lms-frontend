@@ -10,6 +10,7 @@ import { InstructorDashboardPageProps } from '@/types/instructor.types';
 
 export function InstructorDashboardPage({
 	courses,
+	totalStudents = 0,
 }: InstructorDashboardPageProps) {
 	const handleDelete = (courseId: number) => {
 		console.log('Delete course:', courseId);
@@ -34,7 +35,7 @@ export function InstructorDashboardPage({
 			</div>
 
 			{/* Stats */}
-			<InstructorStats courses={courses} />
+			<InstructorStats courses={courses} totalStudents={totalStudents} />
 
 			{/* Course List */}
 			<InstructorCourseList courses={courses} onDelete={handleDelete} />

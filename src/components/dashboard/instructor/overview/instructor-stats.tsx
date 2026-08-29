@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InstructorStatsProps } from '@/types/instructor.types';
 
-export function InstructorStats({ courses }: InstructorStatsProps) {
+export function InstructorStats({
+	courses,
+	totalStudents = 0,
+}: InstructorStatsProps) {
 	const totalLessons = courses.reduce(
 		(acc, course) => acc + (course.lessons?.length || 0),
 		0,
@@ -26,7 +29,7 @@ export function InstructorStats({ courses }: InstructorStatsProps) {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<p className='text-2xl font-bold'>0</p>
+					<p className='text-2xl font-bold'>{totalStudents}</p>
 				</CardContent>
 			</Card>
 			<Card>

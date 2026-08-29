@@ -19,7 +19,7 @@ export function StudentProgress({ courseId }: StudentProgressProps) {
 				// 1. Get all enrollments for this course
 				const enrollments = await enrollmentService.getUserEnrollments();
 				const courseEnrollments = enrollments.filter(
-					(e) => e.course.id === courseId,
+					(e) => e.course?.id === courseId && e.user,
 				);
 
 				if (courseEnrollments.length === 0) {
@@ -31,22 +31,23 @@ export function StudentProgress({ courseId }: StudentProgressProps) {
 				// 2. Get progress for each student
 				const studentData: StudentData[] = await Promise.all(
 					courseEnrollments.map(async (enrollment) => {
-						const userId = enrollment.user.id;
+						const userId = enrollment.user?.id;
 						const progressData =
 							await progressService.getCourseProgress(courseId);
-						const userProgress = progressData.progress.filter(
-							(p) => p.user.id === userId,
-						);
+						const userProgress =
+							progressData?.progress?.filter((p) => p.user?.id === userId) ||
+							[];
 						const completedLessons = userProgress
 							.filter((p) => p.completed)
-							.map((p) => p.lesson.id);
+							.map((p) => p.lesson?.id)
+							.filter((id): id is number => id !== undefined);
 
-						const totalLessons = enrollment.course.lessons?.length || 0;
+						const totalLessons = enrollment.course?.lessons?.length || 0;
 
 						return {
 							id: enrollment.id,
-							studentName: enrollment.user.username,
-							studentEmail: enrollment.user.email,
+							studentName: enrollment.user?.username || 'Unknown Student',
+							studentEmail: enrollment.user?.email || 'N/A',
 							completedLessons,
 							totalLessons,
 						};

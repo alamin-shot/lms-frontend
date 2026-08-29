@@ -3,6 +3,7 @@ import { Quiz, Question } from './quiz.types';
 
 export interface InstructorStatsProps {
 	courses: Course[];
+	totalStudents?: number;
 }
 
 export interface InstructorCourseCardProps {
@@ -17,6 +18,7 @@ export interface InstructorCourseListProps {
 
 export interface InstructorDashboardPageProps {
 	courses: Course[];
+	totalStudents?: number;
 }
 
 export interface ManageLessonsPageProps {

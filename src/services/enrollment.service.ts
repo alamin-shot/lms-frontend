@@ -57,7 +57,7 @@ export const enrollmentService = {
 			(typeof window !== 'undefined' ? localStorage.getItem('jwt') : null);
 		console.log('🔍 Token:', storedToken);
 		const response = await apiClient.get<ApiResponse<Enrollment[]>>(
-			'/api/enrollments?populate[course][populate][lessons]=true',
+			'/api/enrollments?populate[course][populate][lessons]=true&populate[user]=*',
 			storedToken
 				? { headers: { Authorization: `Bearer ${storedToken}` } }
 				: undefined,
@@ -66,7 +66,7 @@ export const enrollmentService = {
 			...enrollment,
 			course: {
 				...enrollment.course,
-				description: richTextToPlainText(enrollment.course.description),
+				description: richTextToPlainText(enrollment.course?.description),
 			},
 		}));
 	},
