@@ -28,8 +28,16 @@ export function useAuth() {
 			};
 			const dashboardPath = dashboardMap[roleName];
 			const token = result.payload.jwt;
+
+			// ✅ STORE TOKEN IN SESSION STORAGE BEFORE NAVIGATION
+			if (typeof window !== 'undefined') {
+				sessionStorage.setItem('auth_token', token);
+			}
+
 			console.log('Login succeeded, navigating to:', dashboardPath);
-			// Pass token as query parameter
+			console.log('Token stored in sessionStorage:', token);
+
+			// Pass token as query parameter AND rely on sessionStorage
 			window.location.href = `${dashboardPath}?token=${encodeURIComponent(token)}`;
 			return true;
 		} else {
@@ -51,6 +59,11 @@ export function useAuth() {
 			};
 			const dashboardPath = dashboardMap[roleName] || '/dashboard/student';
 			const token = result.payload.jwt;
+
+			if (typeof window !== 'undefined') {
+				sessionStorage.setItem('auth_token', token);
+			}
+
 			window.location.href = `${dashboardPath}?token=${encodeURIComponent(token)}`;
 			return true;
 		} else {
@@ -61,6 +74,9 @@ export function useAuth() {
 
 	const handleLogout = () => {
 		dispatch(logout());
+		if (typeof window !== 'undefined') {
+			sessionStorage.removeItem('auth_token');
+		}
 		window.location.href = '/login';
 		toast.success('Logged out successfully');
 	};

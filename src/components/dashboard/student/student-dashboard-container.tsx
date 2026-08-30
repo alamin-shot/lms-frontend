@@ -14,13 +14,15 @@ export async function StudentDashboardContainer({
 	let enrollments: Enrollment[] = [];
 	let allProgress: Progress[] = [];
 
-	// First try token from URL param (passed after login)
+	// ✅ Prioritize: URL param > cookies > sessionStorage (from server)
 	let token = tokenFromParam;
 
-	// If no token from param, try cookies (for subsequent visits)
 	if (!token) {
 		token = (await cookies()).get('jwt')?.value;
 	}
+
+	// ✅ If still no token, check if we can read from sessionStorage (but this is client-side only)
+	// Server can't read sessionStorage, so we need to pass it via URL or cookies
 
 	console.log('🔍 Token in container:', token);
 
