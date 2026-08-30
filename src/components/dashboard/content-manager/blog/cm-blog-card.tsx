@@ -15,7 +15,7 @@ export function CMBlogCard({
 	onTogglePublish,
 }: CMBlogCardProps) {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
-	const isPublished = post.publishedAt !== null;
+	const isPublished = !!post.publishDate;
 
 	return (
 		<>

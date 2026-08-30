@@ -1,29 +1,32 @@
 'use client';
 
 import { Container } from '@/components/ui/container';
-import BackButton from '@/components/ui/back-button';
 import { BlogForm } from './blog-form';
 import { BlogFormData } from '@/lib/validations/blog.schema';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import BackButton from '@/components/ui/back-button';
+import { blogService } from '@/services/blog.service';
 
 export function CreateBlogPage() {
 	const router = useRouter();
 
-	const handleSubmit = (data: BlogFormData) => {
-		console.log('New blog post:', data);
+	const handleSubmit = async (data: BlogFormData) => {
+	try {
+		const post = { ...data };
+		await blogService.create(post);
 		toast.success('Blog post created successfully!');
 		router.push('/dashboard/content-manager');
-		// TODO: Save to backend
-	};
+	} catch (error) {
+		console.error('Error creating blog post:', error);
+		toast.error('Failed to create blog post.');
+	}
+};
 
 	return (
 		<Container className='py-8 max-w-2xl'>
 			<div className='mb-6'>
-				<BackButton
-					href='/dashboard/content-manager'
-					label='Back to Dashboard'
-				/>
+				<BackButton href='/dashboard/content-manager' label='Back to Dashboard' />
 			</div>
 
 			<div className='space-y-6'>

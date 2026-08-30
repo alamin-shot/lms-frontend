@@ -15,6 +15,13 @@ export interface CMCourseCardProps {
 	onDelete?: (courseId: number) => void;
 }
 
+export interface EditCoursePageProps {
+	course: Course;
+}
+export interface CMManageQuestionsPageProps {
+	course: Course;
+	quiz: Quiz;
+}
 export interface CMCourseListProps {
 	courses: Course[];
 	onDelete?: (courseId: number) => void;

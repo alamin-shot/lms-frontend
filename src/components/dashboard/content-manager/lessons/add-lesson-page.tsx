@@ -1,21 +1,26 @@
 'use client';
 
 import { Container } from '@/components/ui/container';
-import  BackButton  from '@/components/ui/back-button';
 import { LessonForm } from '@/components/dashboard/instructor/lessons/lesson-form';
 import { LessonFormData } from '@/lib/validations/lesson.schema';
 import { CMAddLessonPageProps } from '@/types/content-manager.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import BackButton from '@/components/ui/back-button';
+import { lessonService } from '@/services/lesson.service';
 
 export function CMAddLessonPage({ course }: CMAddLessonPageProps) {
 	const router = useRouter();
 
-	const handleSubmit = (data: LessonFormData) => {
-		console.log('New lesson:', data);
-		toast.success('Lesson added successfully!');
-		router.push(`/dashboard/content-manager/courses/${course.id}/lessons`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: LessonFormData) => {
+		try {
+			await lessonService.create(course.id, data);
+			toast.success('Lesson added successfully!');
+			router.push(`/dashboard/content-manager/courses/${course.id}/lessons`);
+		} catch (error) {
+			console.error('Error adding lesson:', error);
+			toast.error('Failed to add lesson.');
+		}
 	};
 
 	return (

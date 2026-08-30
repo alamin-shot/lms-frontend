@@ -7,17 +7,26 @@ import { QuestionFormData } from '@/lib/validations/quiz.schema';
 import { CMAddQuestionPageProps } from '@/types/content-manager.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { questionService } from '@/services/question.service';
 
 export function CMAddQuestionPage({ course, quiz }: CMAddQuestionPageProps) {
 	const router = useRouter();
 
-	const handleSubmit = (data: QuestionFormData) => {
-		console.log('New question:', data);
-		toast.success('Question added successfully!');
-		router.push(
-			`/dashboard/content-manager/courses/${course.id}/quiz/questions`,
-		);
-		// TODO: Save to backend
+	const handleSubmit = async (data: QuestionFormData) => {
+		try {
+			await questionService.create(quiz.id, data);
+			toast.success('Question added successfully!');
+			// Use router.refresh() to refetch data, then push
+			router.refresh();
+			setTimeout(() => {
+				router.push(
+					`/dashboard/content-manager/courses/${course.id}/quiz/questions`
+				);
+			}, 100);
+		} catch (error) {
+			console.error('Error adding question:', error);
+			toast.error('Failed to add question.');
+		}
 	};
 
 	return (

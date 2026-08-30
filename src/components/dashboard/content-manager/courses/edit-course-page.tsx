@@ -1,16 +1,13 @@
 'use client';
 
 import { Container } from '@/components/ui/container';
-import BackButton from '@/components/ui/back-button';
 import { CourseForm } from '@/components/dashboard/instructor/courses/course-form';
 import { CourseFormData } from '@/lib/validations/course.schema';
-import { Course } from '@/types/course.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-
-interface EditCoursePageProps {
-	course: Course;
-}
+import BackButton from '@/components/ui/back-button';
+import { courseService } from '@/services/course.service';
+import { EditCoursePageProps } from '@/types/content-manager.types';
 
 export function EditCoursePage({ course }: EditCoursePageProps) {
 	const router = useRouter();
@@ -22,20 +19,21 @@ export function EditCoursePage({ course }: EditCoursePageProps) {
 		coverImage: course.coverImage || '',
 	};
 
-	const handleSubmit = (data: CourseFormData) => {
-		console.log('Updated course:', data);
-		toast.success('Course updated successfully!');
-		router.push('/dashboard/content-manager');
-		// TODO: Save to backend
+	const handleSubmit = async (data: CourseFormData) => {
+		try {
+			await courseService.update(course.id, data, course.documentId);
+			toast.success('Course updated successfully!');
+			router.push('/dashboard/content-manager');
+		} catch (error) {
+			console.error('Error updating course:', error);
+			toast.error('Failed to update course.');
+		}
 	};
 
 	return (
 		<Container className='py-8 max-w-2xl'>
 			<div className='mb-6'>
-				<BackButton
-					href='/dashboard/content-manager'
-					label='Back to Dashboard'
-				/>
+				<BackButton href='/dashboard/content-manager' label='Back to Dashboard' />
 			</div>
 
 			<div className='space-y-6'>

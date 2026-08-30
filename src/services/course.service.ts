@@ -33,6 +33,17 @@ export const courseService = {
 		}
 		return processCourse(course);
 	},
+	async getByIdForEdit(id: number, token?: string): Promise<Course> {
+		const response = await apiClient.get<ApiResponse<Course[]>>(
+			`/api/courses?filters[id][$eq]=${id}&populate=*`,
+			token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+		);
+		const course = response.data.data[0];
+		if (!course) {
+			throw new Error(`Course with id ${id} not found`);
+		}
+		return processCourse(course);
+	},
 
 	async getBySlug(slug: string, token?: string): Promise<Course> {
 		try {

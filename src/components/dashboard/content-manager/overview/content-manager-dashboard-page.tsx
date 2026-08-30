@@ -1,31 +1,68 @@
 'use client';
+
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { instructorCourses } from '@/mocks';
-import { blogPosts } from '@/mocks/blog-posts';
 import { CMStats } from './cm-stats';
 import { CMCourseList } from '../courses/cm-course-list';
 import { CMBlogList } from '../blog/cm-blog-list';
+import { ContentManagerDashboardPageProps } from '@/types/content-manager.types';
+import { courseService } from '@/services/course.service';
+import { blogService } from '@/services/blog.service';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
-export function ContentManagerDashboardPage() {
-	const courses = instructorCourses;
-	const posts = blogPosts;
+export function ContentManagerDashboardPage({
+	courses,
+	blogPosts,
+}: ContentManagerDashboardPageProps) {
+	const router = useRouter();
 
-	const handleDeleteCourse = (courseId: number) => {
-		console.log('Delete course:', courseId);
-		// TODO: Implement delete
+	const handleDeleteCourse = async (courseId: number) => {
+		try {
+			await courseService.delete(courseId);
+			toast.success('Course deleted successfully!');
+			router.refresh();
+		} catch (error) {
+			console.error('Error deleting course:', error);
+			toast.error('Failed to delete course.');
+		}
 	};
 
-	const handleDeletePost = (postId: number) => {
-		console.log('Delete post:', postId);
-		// TODO: Implement delete
+	const handleDeletePost = async (postId: number) => {
+		try {
+			const post = blogPosts.find((p) => p.id === postId);
+			await blogService.delete(postId, post?.documentId);
+			toast.success('Blog post deleted successfully!');
+			router.refresh();
+		} catch (error) {
+			console.error('Error deleting blog post:', error);
+			toast.error('Failed to delete blog post.');
+		}
 	};
 
-	const handleTogglePublish = (postId: number) => {
-		console.log('Toggle publish:', postId);
-		// TODO: Implement toggle publish
+	const handleTogglePublish = async (postId: number) => {
+		try {
+			const post = blogPosts.find((p) => p.id === postId);
+			if (!post) return;
+
+			const updateData = {
+				title: post.title,
+				body: post.body,
+				coverImage: post.coverImage || '',
+				publishDate: post.publishDate ? null : new Date().toISOString(),
+			};
+
+			await blogService.update(postId, updateData, post.documentId);
+			toast.success(
+				updateData.publishDate ? 'Post published!' : 'Post unpublished!'
+			);
+			router.refresh();
+		} catch (error) {
+			console.error('Error toggling publish:', error);
+			toast.error('Failed to update post status.');
+		}
 	};
 
 	return (
@@ -38,22 +75,20 @@ export function ContentManagerDashboardPage() {
 					</p>
 				</div>
 				<div className='flex gap-2'>
-					<div className='flex gap-2'>
-						<Link href='/dashboard/content-manager/courses/create'>
-							<Button className='bg-purple-600 hover:bg-purple-700'>
-								<Plus className='h-4 w-4 mr-2' /> Create Course
-							</Button>
-						</Link>
-						<Link href='/dashboard/content-manager/blog/create'>
-							<Button className='bg-purple-600 hover:bg-purple-700'>
-								<Plus className='h-4 w-4 mr-2' /> New Post
-							</Button>
-						</Link>
-					</div>
+					<Link href='/dashboard/content-manager/courses/create'>
+						<Button className='bg-purple-600 hover:bg-purple-700'>
+							<Plus className='h-4 w-4 mr-2' /> Create Course
+						</Button>
+					</Link>
+					<Link href='/dashboard/content-manager/blog/create'>
+						<Button className='bg-purple-600 hover:bg-purple-700'>
+							<Plus className='h-4 w-4 mr-2' /> New Post
+						</Button>
+					</Link>
 				</div>
 			</div>
 
-			<CMStats courses={courses} blogPosts={posts} />
+			<CMStats courses={courses} blogPosts={blogPosts} />
 
 			<div className='space-y-12'>
 				<div>
@@ -71,7 +106,7 @@ export function ContentManagerDashboardPage() {
 						</Link>
 					</div>
 					<CMBlogList
-						posts={posts}
+						posts={blogPosts}
 						onDelete={handleDeletePost}
 						onTogglePublish={handleTogglePublish}
 					/>

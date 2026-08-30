@@ -1,5 +1,6 @@
 import { EditBlogPage } from '@/components/dashboard/content-manager/blog/edit-blog-page';
-import { blogPosts } from '@/mocks/blog-posts';
+import { blogService } from '@/services/blog.service';
+import { BlogPost } from '@/types/blog.types';
 import { notFound } from 'next/navigation';
 
 export default async function EditBlogPageRoute({
@@ -8,7 +9,17 @@ export default async function EditBlogPageRoute({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = await params;
-	const post = blogPosts.find((p) => p.id === parseInt(id));
+	let post: BlogPost | null = null;
+
+	try {
+		const allPosts = await blogService.getAll();
+		post = allPosts.find((p) => p.id === parseInt(id, 10)) || null;
+		if (!post) {
+			post = await blogService.getBySlug(id);
+		}
+	} catch {
+		notFound();
+	}
 
 	if (!post) {
 		notFound();

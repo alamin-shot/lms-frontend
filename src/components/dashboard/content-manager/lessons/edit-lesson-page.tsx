@@ -1,12 +1,13 @@
 'use client';
 
 import { Container } from '@/components/ui/container';
-import  BackButton  from '@/components/ui/back-button';
 import { LessonForm } from '@/components/dashboard/instructor/lessons/lesson-form';
 import { LessonFormData } from '@/lib/validations/lesson.schema';
 import { CMEditLessonPageProps } from '@/types/content-manager.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import BackButton from '@/components/ui/back-button';
+import { lessonService } from '@/services/lesson.service';
 
 export function CMEditLessonPage({ course, lesson }: CMEditLessonPageProps) {
 	const router = useRouter();
@@ -18,11 +19,15 @@ export function CMEditLessonPage({ course, lesson }: CMEditLessonPageProps) {
 		order: lesson.order,
 	};
 
-	const handleSubmit = (data: LessonFormData) => {
-		console.log('Updated lesson:', data);
-		toast.success('Lesson updated successfully!');
-		router.push(`/dashboard/content-manager/courses/${course.id}/lessons`);
-		// TODO: Save to backend
+	const handleSubmit = async (data: LessonFormData) => {
+		try {
+			await lessonService.update(lesson.id, data);
+			toast.success('Lesson updated successfully!');
+			router.push(`/dashboard/content-manager/courses/${course.id}/lessons`);
+		} catch (error) {
+			console.error('Error updating lesson:', error);
+			toast.error('Failed to update lesson.');
+		}
 	};
 
 	return (

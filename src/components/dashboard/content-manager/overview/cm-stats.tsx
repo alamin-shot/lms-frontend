@@ -5,8 +5,8 @@ import { BookOpen, FileText, Users, FileCheck } from 'lucide-react';
 
 
 export function CMStats({ courses, blogPosts }: CMStatsProps) {
-	const publishedPosts = blogPosts.filter((p) => p.publishedAt !== null);
-	const draftPosts = blogPosts.filter((p) => p.publishedAt === null);
+	const publishedPosts = blogPosts.filter((p) => p.publishDate !== null && p.publishDate !== undefined);
+	const draftPosts = blogPosts.filter((p) => !p.publishDate);
 
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>

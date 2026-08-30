@@ -2,36 +2,46 @@
 
 import { useState } from 'react';
 import { Container } from '@/components/ui/container';
-import BackButton from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Course } from '@/types/course.types';
 import { Plus, Edit, Trash2, GripVertical } from 'lucide-react';
 import { DeleteConfirmationModal } from '@/components/ui/delete-confirmation-modal';
+import BackButton from '@/components/ui/back-button';
+import { CMManageLessonsPageProps } from '@/types/content-manager.types';
+import { lessonService } from '@/services/lesson.service';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
-interface ManageLessonsPageProps {
-	course: Course;
-}
-
-export function ManageLessonsPage({ course }: ManageLessonsPageProps) {
+export function ManageLessonsPage({ course }: CMManageLessonsPageProps) {
+	const router = useRouter();
 	const lessons = course.lessons || [];
 	const sortedLessons = [...lessons].sort((a, b) => a.order - b.order);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleDeleteClick = (lessonId: number) => {
 		setSelectedLessonId(lessonId);
 		setShowDeleteModal(true);
 	};
 
-	const handleConfirmDelete = () => {
+	const handleConfirmDelete = async () => {
 		if (selectedLessonId) {
-			console.log('Delete lesson:', selectedLessonId);
-			setShowDeleteModal(false);
-			setSelectedLessonId(null);
-			// TODO: Implement delete
+			setIsDeleting(true);
+			try {
+				await lessonService.delete(selectedLessonId);
+				toast.success('Lesson deleted successfully!');
+				router.refresh();
+			} catch (error) {
+				console.error('Error deleting lesson:', error);
+				toast.error('Failed to delete lesson.');
+			} finally {
+				setIsDeleting(false);
+				setShowDeleteModal(false);
+				setSelectedLessonId(null);
+			}
 		}
 	};
 
@@ -39,10 +49,7 @@ export function ManageLessonsPage({ course }: ManageLessonsPageProps) {
 		<>
 			<Container className='py-8'>
 				<div className='mb-6'>
-					<BackButton
-						href='/dashboard/content-manager'
-						label='Back to Dashboard'
-					/>
+					<BackButton href='/dashboard/content-manager' label='Back to Dashboard' />
 				</div>
 
 				<div className='space-y-6'>
@@ -51,9 +58,7 @@ export function ManageLessonsPage({ course }: ManageLessonsPageProps) {
 							<h1 className='text-3xl font-bold'>{course.title}</h1>
 							<p className='text-muted-foreground mt-1'>Manage lessons</p>
 						</div>
-						<Link
-							href={`/dashboard/content-manager/courses/${course.id}/lessons/create`}
-						>
+						<Link href={`/dashboard/content-manager/courses/${course.id}/lessons/create`}>
 							<Button className='bg-purple-600 hover:bg-purple-700'>
 								<Plus className='h-4 w-4 mr-2' /> Add Lesson
 							</Button>
@@ -78,9 +83,7 @@ export function ManageLessonsPage({ course }: ManageLessonsPageProps) {
 											</div>
 										</div>
 										<div className='flex gap-2'>
-											<Link
-												href={`/dashboard/content-manager/courses/${course.id}/lessons/${lesson.id}/edit`}
-											>
+											<Link href={`/dashboard/content-manager/courses/${course.id}/lessons/${lesson.id}/edit`}>
 												<Button variant='outline' size='sm'>
 													<Edit className='h-3 w-3' />
 												</Button>
@@ -90,6 +93,7 @@ export function ManageLessonsPage({ course }: ManageLessonsPageProps) {
 												size='sm'
 												className='text-red-500 hover:text-red-600'
 												onClick={() => handleDeleteClick(lesson.id)}
+												disabled={isDeleting}
 											>
 												<Trash2 className='h-3 w-3' />
 											</Button>
@@ -112,6 +116,7 @@ export function ManageLessonsPage({ course }: ManageLessonsPageProps) {
 				onConfirm={handleConfirmDelete}
 				title='Delete Lesson'
 				description='Are you sure you want to delete this lesson? This action cannot be undone.'
+				isLoading={isDeleting}
 			/>
 		</>
 	);

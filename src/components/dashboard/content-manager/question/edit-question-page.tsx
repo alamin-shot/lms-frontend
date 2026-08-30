@@ -1,12 +1,13 @@
 'use client';
 
 import { Container } from '@/components/ui/container';
-import  BackButton  from '@/components/ui/back-button';
+import BackButton from '@/components/ui/back-button';
 import { QuestionForm } from '@/components/dashboard/instructor/quiz/question-form';
 import { QuestionFormData } from '@/lib/validations/quiz.schema';
 import { CMEditQuestionPageProps } from '@/types/content-manager.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { questionService } from '@/services/question.service';
 
 export function CMEditQuestionPage({
 	course,
@@ -21,13 +22,17 @@ export function CMEditQuestionPage({
 		correctAnswer: question.correctAnswer,
 	};
 
-	const handleSubmit = (data: QuestionFormData) => {
-		console.log('Updated question:', data);
-		toast.success('Question updated successfully!');
-		router.push(
-			`/dashboard/content-manager/courses/${course.id}/quiz/questions`,
-		);
-		// TODO: Save to backend
+	const handleSubmit = async (data: QuestionFormData) => {
+		try {
+			await questionService.update(question.id, data);
+			toast.success('Question updated successfully!');
+			router.push(
+				`/dashboard/content-manager/courses/${course.id}/quiz/questions`,
+			);
+		} catch (error) {
+			console.error('Error updating question:', error);
+			toast.error('Failed to update question.');
+		}
 	};
 
 	return (
