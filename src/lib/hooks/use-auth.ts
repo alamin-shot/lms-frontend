@@ -27,9 +27,10 @@ export function useAuth() {
 				Admin: '/dashboard/admin',
 			};
 			const dashboardPath = dashboardMap[roleName];
+			const token = result.payload.jwt;
 			console.log('Login succeeded, navigating to:', dashboardPath);
-			// Hard navigation - bypasses router cache completely
-			window.location.href = dashboardPath;
+			// Pass token as query parameter
+			window.location.href = `${dashboardPath}?token=${encodeURIComponent(token)}`;
 			return true;
 		} else {
 			toast.error((result.payload as string) || 'Login failed');
@@ -49,7 +50,8 @@ export function useAuth() {
 				Admin: '/dashboard/admin',
 			};
 			const dashboardPath = dashboardMap[roleName] || '/dashboard/student';
-			window.location.href = dashboardPath;
+			const token = result.payload.jwt;
+			window.location.href = `${dashboardPath}?token=${encodeURIComponent(token)}`;
 			return true;
 		} else {
 			toast.error((result.payload as string) || 'Registration failed');

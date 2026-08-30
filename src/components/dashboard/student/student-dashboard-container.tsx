@@ -6,10 +6,21 @@ import { Enrollment } from '@/services/enrollment.service';
 import { Progress } from '@/services/progress.service';
 import { cookies } from 'next/headers';
 
-export async function StudentDashboardContainer() {
+export async function StudentDashboardContainer({
+	token: tokenFromParam,
+}: {
+	token?: string;
+} = {}) {
 	let enrollments: Enrollment[] = [];
 	let allProgress: Progress[] = [];
-	const token = (await cookies()).get('jwt')?.value;
+
+	// Use token from param or fallback to cookies
+	let token = tokenFromParam;
+	if (!token) {
+		token = (await cookies()).get('jwt')?.value;
+	}
+
+	console.log('🔍 Token:', token);
 
 	try {
 		enrollments = await enrollmentService.getUserEnrollments(token);
