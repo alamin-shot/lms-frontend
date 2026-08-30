@@ -20,7 +20,6 @@ const initialState: AuthState = {
 	error: null,
 };
 
-// Login Thunk
 export const login = createAsyncThunk<
 	{ jwt: string; user: User },
 	LoginCredentials,
@@ -51,7 +50,6 @@ export const login = createAsyncThunk<
 	}
 });
 
-// Register Thunk
 export const register = createAsyncThunk<
 	AuthResponse,
 	RegisterData,
@@ -96,8 +94,9 @@ export const restoreUser = createAsyncThunk<
 		const response = await apiClient.get<User>(
 			'/api/users/me?populate[role]=true',
 		);
-		document.cookie = `jwt=${encodeURIComponent(token)}; Path=/; Secure; SameSite=Lax`;
-		document.cookie = `userRole=${encodeURIComponent(response.data.role.name)}; Path=/; Secure; SameSite=Lax`;
+		const domain = typeof window !== 'undefined' ? window.location.hostname : '';
+		document.cookie = `jwt=${encodeURIComponent(token)}; Path=/; Secure; SameSite=Lax; Domain=${domain}`;
+		document.cookie = `userRole=${encodeURIComponent(response.data.role.name)}; Path=/; Secure; SameSite=Lax; Domain=${domain}`;
 		return response.data;
 	} catch (error) {
 		const err = error as AxiosError<ApiErrorResponse>;
@@ -117,8 +116,9 @@ const authSlice = createSlice({
 			state.error = null;
 			if (typeof window !== 'undefined') {
 				localStorage.removeItem('jwt');
-				document.cookie = 'jwt=; Path=/; Max-Age=0; Secure; SameSite=Lax';
-				document.cookie = 'userRole=; Path=/; Max-Age=0; Secure; SameSite=Lax';
+				const domain = window.location.hostname;
+				document.cookie = `jwt=; Path=/; Max-Age=0; Secure; SameSite=Lax; Domain=${domain}`;
+				document.cookie = `userRole=; Path=/; Max-Age=0; Secure; SameSite=Lax; Domain=${domain}`;
 			}
 		},
 		clearError: (state) => {
@@ -130,7 +130,6 @@ const authSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
-			// Login
 			.addCase(login.pending, (state) => {
 				state.isLoading = true;
 				state.error = null;
@@ -141,15 +140,15 @@ const authSlice = createSlice({
 				state.token = action.payload.jwt;
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
-					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/; Secure; SameSite=Lax`;
-					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/; Secure; SameSite=Lax`;
+					const domain = window.location.hostname;
+					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/; Secure; SameSite=Lax; Domain=${domain}`;
+					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/; Secure; SameSite=Lax; Domain=${domain}`;
 				}
 			})
 			.addCase(login.rejected, (state, action) => {
 				state.isLoading = false;
 				state.error = action.payload || 'Login failed';
 			})
-			// Register
 			.addCase(register.pending, (state) => {
 				state.isLoading = true;
 				state.error = null;
@@ -160,8 +159,9 @@ const authSlice = createSlice({
 				state.token = action.payload.jwt;
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
-					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/; Secure; SameSite=Lax`;
-					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/; Secure; SameSite=Lax`;
+					const domain = window.location.hostname;
+					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/; Secure; SameSite=Lax; Domain=${domain}`;
+					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/; Secure; SameSite=Lax; Domain=${domain}`;
 				}
 			})
 			.addCase(register.rejected, (state, action) => {
