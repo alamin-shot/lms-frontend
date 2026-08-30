@@ -28,8 +28,8 @@ export function useAuth() {
 			};
 			const dashboardPath = dashboardMap[roleName];
 			console.log('Login succeeded, navigating to:', dashboardPath);
-			router.push(dashboardPath);
-			router.refresh();
+			// Hard navigation - bypasses router cache completely
+			window.location.href = dashboardPath;
 			return true;
 		} else {
 			toast.error((result.payload as string) || 'Login failed');
@@ -48,8 +48,8 @@ export function useAuth() {
 				'Content Manager': '/dashboard/content-manager',
 				Admin: '/dashboard/admin',
 			};
-			router.push(dashboardMap[roleName] || '/dashboard/student');
-			
+			const dashboardPath = dashboardMap[roleName] || '/dashboard/student';
+			window.location.href = dashboardPath;
 			return true;
 		} else {
 			toast.error((result.payload as string) || 'Registration failed');
@@ -59,7 +59,7 @@ export function useAuth() {
 
 	const handleLogout = () => {
 		dispatch(logout());
-		router.push('/login');
+		window.location.href = '/login';
 		toast.success('Logged out successfully');
 	};
 
