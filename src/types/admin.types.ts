@@ -17,4 +17,9 @@ export interface AdminUserListProps {
 	onRoleChange?: (userId: number, newRole: string) => void;
 }
 
-
+export interface AdminDashboardPageProps {
+	users: User[];
+	courses: number;
+	enrollments: number;
+	blogPosts: number;
+}

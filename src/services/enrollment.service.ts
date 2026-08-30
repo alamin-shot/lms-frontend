@@ -50,6 +50,24 @@ export const enrollmentService = {
 			},
 		});
 	},
+	async getAdminEnrollments(token?: string): Promise<Enrollment[]> {
+		const storedToken =
+			token ??
+			(typeof window !== 'undefined' ? localStorage.getItem('jwt') : null);
+		const response = await apiClient.get<ApiResponse<Enrollment[]>>(
+			'/api/enrollments?populate[course][populate][lessons]=true',
+			storedToken
+				? { headers: { Authorization: `Bearer ${storedToken}` } }
+				: undefined,
+		);
+		return response.data.data.map((enrollment) => ({
+			...enrollment,
+			course: {
+				...enrollment.course,
+				description: richTextToPlainText(enrollment.course?.description),
+			},
+		}));
+	},
 
 	async getUserEnrollments(token?: string): Promise<Enrollment[]> {
 		const storedToken =

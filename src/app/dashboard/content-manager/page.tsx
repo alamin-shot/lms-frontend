@@ -2,11 +2,13 @@ import { ContentManagerDashboardPage } from '@/components/dashboard/content-mana
 import { courseService } from '@/services/course.service';
 import { blogService } from '@/services/blog.service';
 import { cookies } from 'next/headers';
+import { Course } from '@/types/course.types';
+import { BlogPost } from '@/types/blog.types';
 
 export default async function Page() {
 	const token = (await cookies()).get('jwt')?.value;
-	let courses = [];
-	let blogPosts = [];
+	let courses: Course[] = [];
+	let blogPosts: BlogPost[] = [];
 
 	try {
 		courses = await courseService.getAll(token);
@@ -15,7 +17,7 @@ export default async function Page() {
 	}
 
 	try {
-		blogPosts = await blogService.getAll(token);
+		blogPosts = await blogService.getAll();
 	} catch (error) {
 		console.error('Error fetching blog posts:', error);
 	}
