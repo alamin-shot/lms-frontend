@@ -20,10 +20,17 @@ export async function StudentDashboardContainer({
 		token = (await cookies()).get('jwt')?.value;
 	}
 
-	console.log('🔍 Token:', token);
+	console.log('🔍 Token received in container:', token);
+	console.log('🔍 Token length:', token?.length);
+
+	if (!token) {
+		console.log('❌ No token found!');
+		return <StudentDashboardPage courses={[]} />;
+	}
 
 	try {
 		enrollments = await enrollmentService.getUserEnrollments(token);
+		console.log('✅ Enrollments fetched:', enrollments.length);
 	} catch (error) {
 		console.log('Error fetching enrollments:', error);
 		return <StudentDashboardPage courses={[]} />;
@@ -66,6 +73,8 @@ export async function StudentDashboardContainer({
 			};
 		},
 	);
+
+	console.log('✅ Courses with progress:', coursesWithProgress.length);
 
 	return <StudentDashboardPage courses={coursesWithProgress} />;
 }
