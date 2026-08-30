@@ -14,23 +14,23 @@ export async function StudentDashboardContainer({
 	let enrollments: Enrollment[] = [];
 	let allProgress: Progress[] = [];
 
-	// Use token from param or fallback to cookies
+	// First try token from URL param (passed after login)
 	let token = tokenFromParam;
+
+	// If no token from param, try cookies (for subsequent visits)
 	if (!token) {
 		token = (await cookies()).get('jwt')?.value;
 	}
 
-	console.log('🔍 Token received in container:', token);
-	console.log('🔍 Token length:', token?.length);
+	console.log('🔍 Token in container:', token);
 
 	if (!token) {
-		console.log('❌ No token found!');
+		console.log('❌ No token found, returning empty state');
 		return <StudentDashboardPage courses={[]} />;
 	}
 
 	try {
 		enrollments = await enrollmentService.getUserEnrollments(token);
-		console.log('✅ Enrollments fetched:', enrollments.length);
 	} catch (error) {
 		console.log('Error fetching enrollments:', error);
 		return <StudentDashboardPage courses={[]} />;
@@ -73,8 +73,6 @@ export async function StudentDashboardContainer({
 			};
 		},
 	);
-
-	console.log('✅ Courses with progress:', coursesWithProgress.length);
 
 	return <StudentDashboardPage courses={coursesWithProgress} />;
 }
