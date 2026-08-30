@@ -49,6 +49,7 @@ export function useAuth() {
 				Admin: '/dashboard/admin',
 			};
 			router.push(dashboardMap[roleName] || '/dashboard/student');
+			
 			return true;
 		} else {
 			toast.error((result.payload as string) || 'Registration failed');
