@@ -29,6 +29,7 @@ export function useAuth() {
 			const dashboardPath = dashboardMap[roleName];
 			console.log('Login succeeded, navigating to:', dashboardPath);
 			router.push(dashboardPath);
+			router.refresh();
 			return true;
 		} else {
 			toast.error((result.payload as string) || 'Login failed');

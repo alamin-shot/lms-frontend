@@ -68,6 +68,7 @@ export function Navbar() {
 					{isAuthenticated && (
 						<Link
 							href={dashboardHref}
+							prefetch={false}
 							className='text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors'
 						>
 							Dashboard
