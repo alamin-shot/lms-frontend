@@ -27,13 +27,11 @@ export const login = createAsyncThunk<
 	{ rejectValue: string }
 >('auth/login', async (credentials: LoginCredentials, { rejectWithValue }) => {
 	try {
-		// Step 1: Login
 		const response = await apiClient.post<AuthResponse>('/api/auth/local', {
 			identifier: credentials.identifier,
 			password: credentials.password,
 		});
 
-		// Step 2: Fetch user with role
 		const userResponse = await apiClient.get(
 			'/api/users/me?populate[role]=true',
 			{
@@ -41,7 +39,6 @@ export const login = createAsyncThunk<
 			},
 		);
 
-		// Step 3: Merge JWT from login with full user from /me
 		return {
 			jwt: response.data.jwt,
 			user: userResponse.data,
@@ -99,8 +96,8 @@ export const restoreUser = createAsyncThunk<
 		const response = await apiClient.get<User>(
 			'/api/users/me?populate[role]=true',
 		);
-		document.cookie = `jwt=${encodeURIComponent(token)}; Path=/`;
-		document.cookie = `userRole=${encodeURIComponent(response.data.role.name)}; Path=/`;
+		document.cookie = `jwt=${encodeURIComponent(token)}; Path=/; Secure; SameSite=Lax`;
+		document.cookie = `userRole=${encodeURIComponent(response.data.role.name)}; Path=/; Secure; SameSite=Lax`;
 		return response.data;
 	} catch (error) {
 		const err = error as AxiosError<ApiErrorResponse>;
@@ -120,8 +117,8 @@ const authSlice = createSlice({
 			state.error = null;
 			if (typeof window !== 'undefined') {
 				localStorage.removeItem('jwt');
-				document.cookie = 'jwt=; Path=/; Max-Age=0';
-				document.cookie = 'userRole=; Path=/; Max-Age=0';
+				document.cookie = 'jwt=; Path=/; Max-Age=0; Secure; SameSite=Lax';
+				document.cookie = 'userRole=; Path=/; Max-Age=0; Secure; SameSite=Lax';
 			}
 		},
 		clearError: (state) => {
@@ -144,8 +141,8 @@ const authSlice = createSlice({
 				state.token = action.payload.jwt;
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
-					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/`;
-					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/`;
+					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/; Secure; SameSite=Lax`;
+					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/; Secure; SameSite=Lax`;
 				}
 			})
 			.addCase(login.rejected, (state, action) => {
@@ -163,8 +160,8 @@ const authSlice = createSlice({
 				state.token = action.payload.jwt;
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('jwt', action.payload.jwt);
-					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/`;
-					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/`;
+					document.cookie = `jwt=${encodeURIComponent(action.payload.jwt)}; Path=/; Secure; SameSite=Lax`;
+					document.cookie = `userRole=${encodeURIComponent(action.payload.user.role.name)}; Path=/; Secure; SameSite=Lax`;
 				}
 			})
 			.addCase(register.rejected, (state, action) => {
