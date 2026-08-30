@@ -14,25 +14,21 @@ export async function StudentDashboardContainer({
 	let enrollments: Enrollment[] = [];
 	let allProgress: Progress[] = [];
 
-	// ✅ Prioritize: URL param > cookies > sessionStorage (from server)
-	let token = tokenFromParam;
+	// Use token from param
+	const token = tokenFromParam;
+
+	console.log('🔍 Token received in container:', token);
+	console.log('🔍 Token type:', typeof token);
+	console.log('🔍 Token length:', token?.length);
 
 	if (!token) {
-		token = (await cookies()).get('jwt')?.value;
-	}
-
-	// ✅ If still no token, check if we can read from sessionStorage (but this is client-side only)
-	// Server can't read sessionStorage, so we need to pass it via URL or cookies
-
-	console.log('🔍 Token in container:', token);
-
-	if (!token) {
-		console.log('❌ No token found, returning empty state');
+		console.log('❌ No token found in URL param!');
 		return <StudentDashboardPage courses={[]} />;
 	}
 
 	try {
 		enrollments = await enrollmentService.getUserEnrollments(token);
+		console.log('✅ Enrollments fetched:', enrollments.length);
 	} catch (error) {
 		console.log('Error fetching enrollments:', error);
 		return <StudentDashboardPage courses={[]} />;
@@ -75,6 +71,8 @@ export async function StudentDashboardContainer({
 			};
 		},
 	);
+
+	console.log('✅ Courses with progress:', coursesWithProgress.length);
 
 	return <StudentDashboardPage courses={coursesWithProgress} />;
 }

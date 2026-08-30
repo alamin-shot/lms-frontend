@@ -8,7 +8,9 @@ export default async function Page({
 	searchParams: Promise<{ token?: string }>;
 }) {
 	const params = await searchParams;
-	const token = params.token;
+	const token = params?.token;
+
+	console.log('🔍 Token from searchParams:', token);
 
 	return <StudentDashboardContainer token={token} />;
 }
